@@ -23,9 +23,9 @@
     .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
 
     .tabs { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #f0e5d8; display: flex; z-index: 100; height: 70px; }
-    .tab-btn { flex: 1; border: none; background: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #b0b0b0; font-size: 12px; transition: color 0.3s; font-weight: 600; }
+    .tab-btn { flex: 1; border: none; background: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #b0b0b0; font-size: 11px; transition: color 0.3s; font-weight: 600; position: relative; }
     .tab-btn.active { color: #ed7c30; }
-    .tab-btn.active::after { content: ''; position: absolute; bottom: 0; width: 24px; height: 3px; background: #ed7c30; }
+    .tab-btn.active::after { content: ''; position: absolute; bottom: 0; width: 24px; height: 3px; background: #ed7c30; border-radius: 2px; }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
@@ -45,6 +45,7 @@
     .service-icon { font-size: 32px; margin-bottom: 8px; }
     .service-name { font-weight: 600; color: #3a3a3a; font-size: 13px; margin-bottom: 4px; }
     .service-time { font-size: 11px; color: #ed7c30; font-weight: 600; }
+    .service-desc { font-size: 12px; color: #7a7a7a; margin-top: 8px; line-height: 1.4; }
 
     .results { display: none; margin-top: 20px; }
     .results.show { display: block; }
@@ -69,7 +70,7 @@
 <body>
   <div class="main">
     <div class="content">
-      <!-- HOME -->
+      <!-- 1. HOME -->
       <div id="home" class="tab-content active">
         <div style="text-align: center; margin-bottom: 30px;">
           <div style="font-size: 48px; margin-bottom: 12px;">📊</div>
@@ -130,7 +131,7 @@
         </div>
       </div>
 
-      <!-- ANALYSIS -->
+      <!-- 2. ANALYSIS -->
       <div id="analysis" class="tab-content">
         <div class="card">
           <h2 class="section-title">Анализ профиля</h2>
@@ -166,61 +167,102 @@
 
         <div class="card">
           <h2 class="section-title">Premium подписка</h2>
-          <p style="font-size: 13px; color: #5a5a5a; margin-bottom: 12px;">50 ⭐ Telegram Stars — полный анализ + рекомендации</p>
-          <button class="btn btn-primary">Купить Premium →</button>
+          <p style="font-size: 13px; color: #5a5a5a; margin-bottom: 12px;">50 ⭐ Telegram Stars</p>
+          <div class="feature">
+            <div class="feature-icon">✓</div>
+            <div class="feature-text">Полный анализ профиля</div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">✓</div>
+            <div class="feature-text">Персональная стратегия роста</div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">✓</div>
+            <div class="feature-text">Анализ конкурентов</div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">✓</div>
+            <div class="feature-text">Топ-5 рекомендаций</div>
+          </div>
+          <button class="btn btn-primary" style="margin-top: 16px;">Купить Premium →</button>
         </div>
+      </div>
 
+      <!-- 3. SERVICES -->
+      <div id="services" class="tab-content">
         <div class="card">
           <h2 class="section-title">Дополнительные услуги</h2>
+          <p style="font-size: 13px; color: #7a7a7a; margin-bottom: 16px;">Расширенные возможности для профессионального роста</p>
+
           <div class="services-grid">
             <div class="service-card" onclick="request('Монтаж видео')">
               <div class="service-icon">🎬</div>
-              <div class="service-name">Монтаж</div>
+              <div class="service-name">Монтаж видео</div>
               <div class="service-time">1-24ч</div>
+              <div class="service-desc">Цветокоррекция, эффекты, музыка</div>
             </div>
+
             <div class="service-card" onclick="request('Съемка контента')">
               <div class="service-icon">📹</div>
-              <div class="service-name">Съемка</div>
+              <div class="service-name">Съемка контента</div>
               <div class="service-time">до 3дн</div>
+              <div class="service-desc">Профессиональная съемка под твой стиль</div>
             </div>
+
             <div class="service-card" onclick="request('Личное ведение')">
               <div class="service-icon">👤</div>
-              <div class="service-name">Ведение</div>
+              <div class="service-name">Личное ведение</div>
               <div class="service-time">ежедн</div>
+              <div class="service-desc">Полный контроль аккаунта</div>
             </div>
+
             <div class="service-card" onclick="request('Контент-план')">
               <div class="service-icon">📋</div>
-              <div class="service-name">План</div>
+              <div class="service-name">Контент-план</div>
               <div class="service-time">1мес</div>
+              <div class="service-desc">Месячный план с идеями</div>
             </div>
+
             <div class="service-card" onclick="request('Хештеги')">
               <div class="service-icon">🔍</div>
               <div class="service-name">Хештеги</div>
               <div class="service-time">быстро</div>
+              <div class="service-desc">SEO-оптимизированные описания</div>
             </div>
+
             <div class="service-card" onclick="request('Музыка подбор')">
               <div class="service-icon">🎵</div>
               <div class="service-name">Музыка</div>
               <div class="service-time">24ч</div>
+              <div class="service-desc">Подбор трендовых треков</div>
             </div>
+
             <div class="service-card" onclick="request('Постинг-бот')">
               <div class="service-icon">🤖</div>
-              <div class="service-name">Бот</div>
+              <div class="service-name">Постинг-бот</div>
               <div class="service-time">авто</div>
+              <div class="service-desc">Автоматический постинг</div>
             </div>
+
             <div class="service-card" onclick="request('Консультация')">
               <div class="service-icon">💬</div>
-              <div class="service-name">Консульт</div>
+              <div class="service-name">Консультация</div>
               <div class="service-time">30мин</div>
+              <div class="service-desc">С экспертом по стратегии</div>
             </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 20px; font-size: 13px; color: #7a7a7a;">
+            💰 Цена: от 500 до 10,000₽<br>
+            Нажми на услугу чтобы заказать
           </div>
         </div>
       </div>
 
-      <!-- PROFILE -->
+      <!-- 4. PROFILE -->
       <div id="profile" class="tab-content">
         <div class="profile-section">
-          <div class="profile-title">Профиль</div>
+          <div class="profile-title">Мой профиль</div>
           <div class="profile-text">Информация появится после первого анализа</div>
         </div>
 
@@ -229,15 +271,16 @@
           <div class="profile-text">
             📧 support@statsflow.app<br>
             💬 Telegram чат<br><br>
-            Возникли вопросы? Напиши нам!
+            Возникли вопросы? Напиши нам в любое время!
           </div>
         </div>
 
         <div class="profile-section">
           <div class="profile-title">О сервисе</div>
           <div class="profile-text">
-            StatsFlow помогает создателям контента анализировать профили и расти быстрее.<br><br>
-            Версия 1.0 • 2024
+            StatsFlow помогает создателям контента анализировать профили и расти быстрее на всех платформах.<br><br>
+            Версия 1.0 • 2024<br>
+            Made with ❤️ for creators
           </div>
         </div>
       </div>
@@ -246,6 +289,7 @@
     <div class="tabs">
       <button class="tab-btn active" onclick="tab('home')"><div>🏠</div><div>Home</div></button>
       <button class="tab-btn" onclick="tab('analysis')"><div>📊</div><div>Анализ</div></button>
+      <button class="tab-btn" onclick="tab('services')"><div>✨</div><div>Услуги</div></button>
       <button class="tab-btn" onclick="tab('profile')"><div>👤</div><div>Профиль</div></button>
     </div>
   </div>
@@ -305,7 +349,7 @@
 
     function request(service) {
       tg.sendData(JSON.stringify({ action: 'request_service', service }));
-      alert('Запрос отправлен в чат');
+      alert('✓ Запрос отправлен в чат');
     }
   </script>
 </body>
