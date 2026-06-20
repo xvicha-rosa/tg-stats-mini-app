@@ -5,6 +5,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { analyzeStats, calculateGrowth } from './utils/analytics.js';
 import { verifyTelegramData } from './utils/telegram.js';
+import { scrapeTikTokProfile, extractTikTokUsername, validateTikTokUrl } from './scrapers/tiktok.js';
+import { scrapeInstagramProfile, extractInstagramUsername, validateInstagramUrl } from './scrapers/instagram.js';
+import { scrapeYouTubeChannel, extractYouTubeChannelId, validateYouTubeUrl } from './scrapers/youtube.js';
 
 dotenv.config();
 
@@ -17,6 +20,44 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
 const PORT = process.env.PORT || 3000;
+
+// Scrape profile endpoint
+app.post('/api/scrape', async (req, res) => {
+  try {
+    const { profile_url } = req.body;
+
+    if (!profile_url) {
+      return res.status(400).json({ error: 'profile_url required' });
+    }
+
+    let scrapedData;
+
+    if (validateTikTokUrl(profile_url)) {
+      const username = extractTikTokUsername(profile_url);
+      if (!username) {
+        return res.status(400).json({ error: 'Invalid TikTok URL' });
+      }
+      scrapedData = await scrapeTikTokProfile(username);
+    } else if (validateInstagramUrl(profile_url)) {
+      const username = extractInstagramUsername(profile_url);
+      if (!username) {
+        return res.status(400).json({ error: 'Invalid Instagram URL' });
+      }
+      scrapedData = await scrapeInstagramProfile(username);
+    } else if (validateYouTubeUrl(profile_url)) {
+      scrapedData = await scrapeYouTubeChannel(profile_url);
+    } else {
+      return res.status(400).json({ error: 'Unsupported platform or invalid URL' });
+    }
+
+    res.json({
+      success: true,
+      data: scrapedData
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Free analysis endpoint
 app.post('/api/analyze', (req, res) => {

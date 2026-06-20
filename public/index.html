@@ -46,6 +46,13 @@
       margin-bottom: 16px;
     }
 
+    h3 {
+      color: #333;
+      font-size: 16px;
+      margin: 20px 0 12px 0;
+      font-weight: 600;
+    }
+
     .input-group {
       margin-bottom: 16px;
     }
@@ -58,27 +65,24 @@
       font-weight: 500;
     }
 
-    input {
+    input, textarea {
       width: 100%;
       padding: 12px;
       border: 2px solid #e0e0e0;
       border-radius: 8px;
       font-size: 16px;
+      font-family: inherit;
       transition: border-color 0.3s;
     }
 
-    input:focus {
+    input:focus, textarea:focus {
       outline: none;
       border-color: #667eea;
     }
 
-    select {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 16px;
-      background: white;
+    textarea {
+      resize: vertical;
+      min-height: 100px;
     }
 
     .btn {
@@ -111,6 +115,15 @@
     .btn-premium:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
     }
 
     .results {
@@ -156,21 +169,23 @@
     }
 
     .quality-score {
-      font-size: 36px;
+      font-size: 48px;
       font-weight: 700;
       color: #667eea;
       text-align: center;
-      margin: 16px 0;
+      margin: 24px 0;
     }
 
     .quality-badge {
       display: inline-block;
       background: #667eea;
       color: white;
-      padding: 6px 12px;
+      padding: 8px 16px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
+      text-align: center;
+      width: 100%;
     }
 
     .growth-forecast {
@@ -181,7 +196,7 @@
     }
 
     .growth-number {
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 700;
       color: #667eea;
       text-align: center;
@@ -201,6 +216,7 @@
       border-radius: 4px;
       margin-top: 12px;
       color: #856404;
+      line-height: 1.5;
     }
 
     .loading {
@@ -231,14 +247,25 @@
       border-radius: 4px;
       color: #721c24;
       display: none;
+      margin-bottom: 16px;
+    }
+
+    .info {
+      background: #d1ecf1;
+      border-left: 4px solid #0c5460;
+      padding: 12px;
+      border-radius: 4px;
+      color: #0c5460;
+      display: none;
+      margin-bottom: 16px;
     }
 
     .premium-badge {
       background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
       color: white;
-      padding: 8px 12px;
+      padding: 4px 8px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       display: inline-block;
     }
@@ -251,7 +278,7 @@
 
     .tab-btn {
       flex: 1;
-      padding: 10px;
+      padding: 12px;
       border: 2px solid #e0e0e0;
       background: white;
       border-radius: 8px;
@@ -259,6 +286,7 @@
       font-weight: 600;
       color: #666;
       transition: all 0.3s;
+      font-size: 14px;
     }
 
     .tab-btn.active {
@@ -274,11 +302,97 @@
     .tab-content.active {
       display: block;
     }
+
+    .profile-preview {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+
+    .profile-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #667eea;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .profile-info {
+      flex: 1;
+    }
+
+    .profile-name {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .profile-stats {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .section-divider {
+      height: 8px;
+      background: #f0f0f0;
+      margin: 16px 0;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .metric-box {
+      background: #f9f9f9;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .action-buttons .btn {
+      flex: 1;
+      margin-bottom: 0;
+      padding: 12px;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>📊 Stats Analyzer</h1>
+
+    <div class="error" id="error"></div>
+    <div class="info" id="info"></div>
+    <div class="loading" id="loading"><div class="loader"></div></div>
 
     <div class="card">
       <div class="tabs">
@@ -293,40 +407,12 @@
         <h2>Быстрая оценка</h2>
 
         <div class="input-group">
-          <label>Платформа</label>
-          <select id="platform">
-            <option value="tiktok">TikTok</option>
-            <option value="instagram">Instagram</option>
-            <option value="youtube">YouTube</option>
-          </select>
+          <label>Ссылка на профиль</label>
+          <textarea id="profile-url" placeholder="https://www.tiktok.com/@username&#10;или&#10;https://www.instagram.com/username&#10;или&#10;https://www.youtube.com/@channelname"></textarea>
+          <small style="color: #999; display: block; margin-top: 4px;">Вставь ссылку на профиль TikTok, Instagram или YouTube</small>
         </div>
 
-        <div class="input-group">
-          <label>Количество подписчиков</label>
-          <input type="number" id="followers" placeholder="10000" min="0">
-        </div>
-
-        <div class="input-group">
-          <label>Лайки (последний пост)</label>
-          <input type="number" id="likes" placeholder="500" min="0">
-        </div>
-
-        <div class="input-group">
-          <label>Просмотры (последний пост)</label>
-          <input type="number" id="views" placeholder="5000" min="0">
-        </div>
-
-        <div class="input-group">
-          <label>Комментарии (последний пост)</label>
-          <input type="number" id="comments" placeholder="50" min="0">
-        </div>
-
-        <div class="input-group">
-          <label>Репосты/Шеры (последний пост)</label>
-          <input type="number" id="reposts" placeholder="20" min="0">
-        </div>
-
-        <button class="btn btn-primary" onclick="analyzeFree()">Проанализировать бесплатно</button>
+        <button class="btn btn-primary" onclick="scrapeAndAnalyze('free')">📍 Проанализировать</button>
       </div>
 
       <!-- Premium Analysis -->
@@ -337,76 +423,49 @@
         </p>
 
         <div class="input-group">
-          <label>Платформа</label>
-          <select id="platform-premium">
-            <option value="tiktok">TikTok</option>
-            <option value="instagram">Instagram</option>
-            <option value="youtube">YouTube</option>
-          </select>
+          <label>Ссылка на профиль</label>
+          <textarea id="profile-url-premium" placeholder="https://www.tiktok.com/@username&#10;или&#10;https://www.instagram.com/username&#10;или&#10;https://www.youtube.com/@channelname"></textarea>
+          <small style="color: #999; display: block; margin-top: 4px;">Вставь ссылку на профиль TikTok, Instagram или YouTube</small>
         </div>
 
-        <div class="input-group">
-          <label>Количество подписчиков</label>
-          <input type="number" id="followers-premium" placeholder="10000" min="0">
-        </div>
-
-        <div class="input-group">
-          <label>Лайки</label>
-          <input type="number" id="likes-premium" placeholder="500" min="0">
-        </div>
-
-        <div class="input-group">
-          <label>Просмотры</label>
-          <input type="number" id="views-premium" placeholder="5000" min="0">
-        </div>
-
-        <div class="input-group">
-          <label>Комментарии</label>
-          <input type="number" id="comments-premium" placeholder="50" min="0">
-        </div>
-
-        <div class="input-group">
-          <label>Репосты/Шеры</label>
-          <input type="number" id="reposts-premium" placeholder="20" min="0">
-        </div>
-
-        <button class="btn btn-premium" onclick="analyzePremium()">
-          Полный анализ за ⭐5
+        <button class="btn btn-premium" onclick="scrapeAndAnalyze('premium')">
+          🌟 Полный анализ за ⭐5
         </button>
       </div>
     </div>
 
-    <div class="error" id="error"></div>
-    <div class="loading" id="loading"><div class="loader"></div></div>
-
+    <!-- Profile Preview & Results -->
     <div class="results" id="results">
       <div class="card">
-        <div class="stat-row">
-          <span class="stat-label">Энгейджмент</span>
-          <span class="stat-value" id="engagement">0%</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Лайки / Просмотры</span>
-          <span class="stat-value" id="like-ratio">0%</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Комментарии / Лайки</span>
-          <span class="stat-value" id="comment-rate">0%</span>
-        </div>
+        <div class="profile-preview" id="profile-preview"></div>
+
+        <div class="section-divider"></div>
+
+        <h3>📈 Основные метрики</h3>
+        <div class="metrics-grid" id="basic-metrics"></div>
 
         <div class="quality-score" id="quality-score">75</div>
         <div style="text-align: center; margin-bottom: 16px;">
           <span class="quality-badge" id="quality-label">Хорошо</span>
         </div>
 
+        <div class="section-divider"></div>
+
+        <h3>🚀 Прогноз роста</h3>
         <div class="growth-forecast">
-          <div class="growth-label">Прогноз подписчиков на следующую неделю</div>
+          <div class="growth-label">Потенциальный рост на следующую неделю</div>
           <div class="growth-number" id="growth-forecast">+150</div>
         </div>
 
         <div class="recommendation" id="recommendation"></div>
+
+        <div class="action-buttons">
+          <button class="btn btn-secondary" onclick="resetForm()">← Назад</button>
+          <button class="btn btn-premium" onclick="switchTab('premium')" id="upgrade-btn">🌟 Детали</button>
+        </div>
       </div>
 
+      <!-- Premium Results -->
       <div id="premium-results" style="display: none;">
         <div class="card">
           <h2>🎯 Детальные рекомендации</h2>
@@ -414,7 +473,7 @@
         </div>
 
         <div class="card">
-          <h2>📈 Анализ конкурентов</h2>
+          <h2>📊 Анализ конкурентов</h2>
           <div class="stat-row">
             <span class="stat-label">Твой энгейджмент</span>
             <span class="stat-value" id="your-engagement">0%</span>
@@ -433,127 +492,181 @@
           <h2>💡 Стратегия контента</h2>
           <p id="content-strategy" style="line-height: 1.6; color: #666;"></p>
         </div>
+
+        <div class="card">
+          <h2>🔥 Топ советы</h2>
+          <div id="top-tips"></div>
+        </div>
+
+        <button class="btn btn-secondary" onclick="resetForm()">← Новый анализ</button>
       </div>
     </div>
   </div>
 
   <script>
-    // Initialize Telegram WebApp
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.setHeaderColor('#667eea');
 
+    let currentAnalysis = null;
+
     function switchTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      event.target.classList.add('active');
+      event.target.closest('.tab-btn').classList.add('active');
       document.getElementById(tab).classList.add('active');
     }
 
-    async function analyzeFree() {
-      const data = {
-        followers: parseInt(document.getElementById('followers').value),
-        likes: parseInt(document.getElementById('likes').value),
-        views: parseInt(document.getElementById('views').value),
-        comments: parseInt(document.getElementById('comments').value),
-        reposts: parseInt(document.getElementById('reposts').value),
-        platform: document.getElementById('platform').value
-      };
+    async function scrapeAndAnalyze(mode) {
+      const profileUrl = mode === 'free'
+        ? document.getElementById('profile-url').value.trim()
+        : document.getElementById('profile-url-premium').value.trim();
 
-      if (!data.followers || !data.likes) {
-        showError('Заполни подписчиков и лайки');
+      if (!profileUrl) {
+        showError('Вставь ссылку на профиль');
         return;
       }
 
       showLoading(true);
       try {
-        const response = await fetch('/api/analyze', {
+        // Scrape profile
+        const scrapeRes = await fetch('/api/scrape', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
+          body: JSON.stringify({ profile_url: profileUrl })
         });
 
-        const result = await response.json();
-        displayResults(result);
-        document.getElementById('premium-results').style.display = 'none';
+        if (!scrapeRes.ok) {
+          const err = await scrapeRes.json();
+          throw new Error(err.error || 'Ошибка скрейпинга');
+        }
+
+        const scrapedData = await scrapeRes.json();
+        const stats = scrapedData.data;
+
+        // Prepare analysis data
+        const analysisData = {
+          followers: stats.followers || stats.subscribers || 0,
+          likes: stats.estimated_likes || stats.likes || 0,
+          views: stats.total_views || stats.estimated_avg_likes * 50 || 0,
+          comments: stats.estimated_comments || stats.estimated_avg_comments || 0,
+          reposts: stats.estimated_reposts || 0,
+          platform: stats.platform
+        };
+
+        // Analyze
+        const analyzeRes = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(analysisData)
+        });
+
+        const analysis = await analyzeRes.json();
+        currentAnalysis = { ...analysis, profile: stats, mode };
+
+        displayResults(analysis, stats, mode);
       } catch (error) {
-        showError('Ошибка анализа: ' + error.message);
+        showError(error.message);
       } finally {
         showLoading(false);
       }
     }
 
-    async function analyzePremium() {
-      const data = {
-        followers: parseInt(document.getElementById('followers-premium').value),
-        likes: parseInt(document.getElementById('likes-premium').value),
-        views: parseInt(document.getElementById('views-premium').value),
-        comments: parseInt(document.getElementById('comments-premium').value),
-        reposts: parseInt(document.getElementById('reposts-premium').value),
-        platform: document.getElementById('platform-premium').value,
-        initData: tg.initData
-      };
+    function displayResults(analysis, profile, mode) {
+      const { analysis: data, preview } = analysis;
 
-      if (!data.followers || !data.likes) {
-        showError('Заполни подписчиков и лайки');
-        return;
-      }
+      // Profile preview
+      const emoji = { tiktok: '🎵', instagram: '📷', youtube: '📺' }[profile.platform] || '📊';
+      document.getElementById('profile-preview').innerHTML = `
+        <div class="profile-avatar">${emoji}</div>
+        <div class="profile-info">
+          <div class="profile-name">${profile.username || profile.url}</div>
+          <div class="profile-stats">${data.followers.toLocaleString()} подписчиков • ${profile.platform}</div>
+        </div>
+      `;
 
-      showLoading(true);
-      try {
-        // First show payment
-        tg.sendData(JSON.stringify({ action: 'premium_payment', stars: 5 }));
+      // Basic metrics
+      const metricsHtml = `
+        <div class="metric-box">
+          <div class="metric-value">${data.followers.toLocaleString()}</div>
+          <div class="metric-label">Подписчики</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-value">${Math.round(data.engagement_rate)}</div>
+          <div class="metric-label">% Энгейджмент</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-value">${data.likes.toLocaleString()}</div>
+          <div class="metric-label">Лайки</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-value">${Math.round(data.comment_rate * 100)}</div>
+          <div class="metric-label">% Комментарии</div>
+        </div>
+      `;
+      document.getElementById('basic-metrics').innerHTML = metricsHtml;
 
-        const response = await fetch('/api/premium-analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
+      // Quality score
+      document.getElementById('quality-score').textContent = data.quality_score;
+      const score = data.quality_score;
+      const label = score >= 70 ? '✅ Отличный' : score >= 50 ? '⚠️ Хороший' : '❌ Плохой';
+      document.getElementById('quality-label').textContent = label;
 
-        const result = await response.json();
-        displayPremiumResults(result);
-      } catch (error) {
-        showError('Ошибка: ' + error.message);
-      } finally {
-        showLoading(false);
-      }
-    }
+      // Growth forecast
+      document.getElementById('growth-forecast').textContent =
+        preview.potential_growth > data.followers
+          ? '+' + (preview.potential_growth - data.followers).toLocaleString()
+          : (preview.potential_growth - data.followers).toLocaleString();
 
-    function displayResults(result) {
-      const { analysis, preview } = result;
-
-      document.getElementById('engagement').textContent = analysis.engagement_rate.toFixed(2) + '%';
-      document.getElementById('like-ratio').textContent = (analysis.like_to_view_ratio * 100).toFixed(2) + '%';
-      document.getElementById('comment-rate').textContent = analysis.comment_rate.toFixed(2) + '%';
-      document.getElementById('quality-score').textContent = analysis.quality_score;
-      document.getElementById('growth-forecast').textContent = preview.potential_growth > analysis.followers
-        ? '+' + (preview.potential_growth - analysis.followers)
-        : analysis.followers - preview.potential_growth;
       document.getElementById('recommendation').textContent = preview.recommendation;
 
-      const score = analysis.quality_score;
-      const label = score >= 70 ? '✅ Хорошо' : score >= 50 ? '⚠️ Нормально' : '❌ Плохо';
-      document.getElementById('quality-label').textContent = label;
+      // Show/hide premium
+      if (mode === 'premium') {
+        displayPremiumResults(analysis);
+      } else {
+        document.getElementById('premium-results').style.display = 'none';
+      }
 
       document.getElementById('results').classList.add('show');
       document.getElementById('error').style.display = 'none';
     }
 
     function displayPremiumResults(result) {
-      displayResults({ analysis: result.data, preview: result.data });
+      const { analysis: data } = result;
 
-      const recs = result.data.detailed_recommendations;
+      const recs = data.detailed_recommendations || [
+        'Улучши качество контента',
+        'Постай регулярно',
+        'Взаимодействуй с аудиторией'
+      ];
+
       document.getElementById('detailed-recs').innerHTML = recs.map(r =>
         `<div class="recommendation">${r}</div>`
       ).join('');
 
-      document.getElementById('your-engagement').textContent =
-        result.data.competitor_analysis.your_avg_engagement.toFixed(2) + '%';
+      document.getElementById('your-engagement').textContent = data.engagement_rate.toFixed(1) + '%';
       document.getElementById('position').textContent =
-        result.data.competitor_analysis.position === 'выше среднего' ? '✅ Выше среднего' : '⚠️ Ниже среднего';
-      document.getElementById('content-strategy').textContent = result.data.content_strategy;
+        data.engagement_rate > 2.5 ? '✅ Выше среднего' : '⚠️ Ниже среднего';
+      document.getElementById('content-strategy').textContent = data.content_strategy || 'Разрабатываем стратегию...';
+
+      const tips = [
+        '🎬 Качество > Количество',
+        '💬 Вовлекай аудиторию',
+        '⏰ Постай в пиковые часы',
+        '🎵 Используй тренды'
+      ];
+      document.getElementById('top-tips').innerHTML = tips.map(t =>
+        `<div class="recommendation">${t}</div>`
+      ).join('');
 
       document.getElementById('premium-results').style.display = 'block';
+    }
+
+    function resetForm() {
+      document.getElementById('profile-url').value = '';
+      document.getElementById('profile-url-premium').value = '';
+      document.getElementById('results').classList.remove('show');
+      document.getElementById('error').style.display = 'none';
     }
 
     function showError(msg) {
