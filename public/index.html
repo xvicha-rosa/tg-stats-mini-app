@@ -27,6 +27,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      height: 100vh;
     }
 
     .background-pattern {
@@ -45,10 +46,25 @@
     .container {
       flex: 1;
       overflow-y: auto;
+      overflow-x: hidden;
       padding: 20px;
-      padding-bottom: 80px;
+      padding-bottom: 90px;
       position: relative;
       z-index: 1;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .container::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .container::-webkit-scrollbar-thumb {
+      background: rgba(237, 124, 48, 0.3);
+      border-radius: 2px;
     }
 
     .tabs-container {
