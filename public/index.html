@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stats Analyzer - TG Mini App</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: white;
+      font-size: 28px;
+      margin-bottom: 24px;
+      text-align: center;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    h2 {
+      color: #667eea;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      background: white;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 12px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-premium {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+
+    .btn-premium:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+    }
+
+    .results {
+      display: none;
+    }
+
+    .results.show {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      color: #666;
+      font-weight: 500;
+    }
+
+    .stat-value {
+      color: #667eea;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .quality-score {
+      font-size: 36px;
+      font-weight: 700;
+      color: #667eea;
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    .quality-badge {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .growth-forecast {
+      background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+
+    .growth-number {
+      font-size: 28px;
+      font-weight: 700;
+      color: #667eea;
+      text-align: center;
+    }
+
+    .growth-label {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    .recommendation {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 12px;
+      color: #856404;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error {
+      background: #f8d7da;
+      border-left: 4px solid #f5576c;
+      padding: 12px;
+      border-radius: 4px;
+      color: #721c24;
+      display: none;
+    }
+
+    .premium-badge {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active {
+      border-color: #667eea;
+      background: #667eea;
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Stats Analyzer</h1>
+
+    <div class="card">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('free')">Бесплатно</button>
+        <button class="tab-btn" onclick="switchTab('premium')">
+          <span class="premium-badge">PRO</span>
+        </button>
+      </div>
+
+      <!-- Free Analysis -->
+      <div id="free" class="tab-content active">
+        <h2>Быстрая оценка</h2>
+
+        <div class="input-group">
+          <label>Платформа</label>
+          <select id="platform">
+            <option value="tiktok">TikTok</option>
+            <option value="instagram">Instagram</option>
+            <option value="youtube">YouTube</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Количество подписчиков</label>
+          <input type="number" id="followers" placeholder="10000" min="0">
+        </div>
+
+        <div class="input-group">
+          <label>Лайки (последний пост)</label>
+          <input type="number" id="likes" placeholder="500" min="0">
+        </div>
+
+        <div class="input-group">
+          <label>Просмотры (последний пост)</label>
+          <input type="number" id="views" placeholder="5000" min="0">
+        </div>
+
+        <div class="input-group">
+          <label>Комментарии (последний пост)</label>
+          <input type="number" id="comments" placeholder="50" min="0">
+        </div>
+
+        <div class="input-group">
+          <label>Репосты/Шеры (последний пост)</label>
+          <input type="number" id="reposts" placeholder="20" min="0">
+        </div>
+
+        <button class="btn btn-primary" onclick="analyzeFree()">Проанализировать бесплатно</button>
+      </div>
+
+      <!-- Premium Analysis -->
+      <div id="premium" class="tab-content">
+        <h2>Полный анализ <span class="premium-badge">PRO</span></h2>
+        <p style="color: #666; margin-bottom: 16px; font-size: 14px;">
+          Получи детальные рекомендации и стратегию роста. Оплата Telegram Stars.
+        </p>
+
+        <div class="input-group">
+          <label>Платформа</label>
+          <select id="platform-premium">
+            <option value="tiktok">TikTok</option>
+            <option value="instagram">Instagram</option>
+            <option value="youtube">YouTube</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Количество подписчиков</label>
+          <input type="number" id="followers-premium" placeholder="10000" min="0">
+        </div>
+
+        <div class="input-group">
+          <label>Лайки</label>
+          <input type="number" id="likes-premium" placeholder="500" min="0">
+        </div>
+
+        <div class="input-group">
+          <label>Просмотры</label>
+          <input type="number" id="views-premium" placeholder="5000" min="0">
+        </div>
+
+        <div class="input-group">
+          <label>Комментарии</label>
+          <input type="number" id="comments-premium" placeholder="50" min="0">
+        </div>
+
+        <div class="input-group">
+          <label>Репосты/Шеры</label>
+          <input type="number" id="reposts-premium" placeholder="20" min="0">
+        </div>
+
+        <button class="btn btn-premium" onclick="analyzePremium()">
+          Полный анализ за ⭐5
+        </button>
+      </div>
+    </div>
+
+    <div class="error" id="error"></div>
+    <div class="loading" id="loading"><div class="loader"></div></div>
+
+    <div class="results" id="results">
+      <div class="card">
+        <div class="stat-row">
+          <span class="stat-label">Энгейджмент</span>
+          <span class="stat-value" id="engagement">0%</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Лайки / Просмотры</span>
+          <span class="stat-value" id="like-ratio">0%</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Комментарии / Лайки</span>
+          <span class="stat-value" id="comment-rate">0%</span>
+        </div>
+
+        <div class="quality-score" id="quality-score">75</div>
+        <div style="text-align: center; margin-bottom: 16px;">
+          <span class="quality-badge" id="quality-label">Хорошо</span>
+        </div>
+
+        <div class="growth-forecast">
+          <div class="growth-label">Прогноз подписчиков на следующую неделю</div>
+          <div class="growth-number" id="growth-forecast">+150</div>
+        </div>
+
+        <div class="recommendation" id="recommendation"></div>
+      </div>
+
+      <div id="premium-results" style="display: none;">
+        <div class="card">
+          <h2>🎯 Детальные рекомендации</h2>
+          <div id="detailed-recs"></div>
+        </div>
+
+        <div class="card">
+          <h2>📈 Анализ конкурентов</h2>
+          <div class="stat-row">
+            <span class="stat-label">Твой энгейджмент</span>
+            <span class="stat-value" id="your-engagement">0%</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Средний рынок</span>
+            <span class="stat-value">2.5%</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Позиция</span>
+            <span class="stat-value" id="position">🔽 Ниже</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>💡 Стратегия контента</h2>
+          <p id="content-strategy" style="line-height: 1.6; color: #666;"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Telegram WebApp
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.setHeaderColor('#667eea');
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tab).classList.add('active');
+    }
+
+    async function analyzeFree() {
+      const data = {
+        followers: parseInt(document.getElementById('followers').value),
+        likes: parseInt(document.getElementById('likes').value),
+        views: parseInt(document.getElementById('views').value),
+        comments: parseInt(document.getElementById('comments').value),
+        reposts: parseInt(document.getElementById('reposts').value),
+        platform: document.getElementById('platform').value
+      };
+
+      if (!data.followers || !data.likes) {
+        showError('Заполни подписчиков и лайки');
+        return;
+      }
+
+      showLoading(true);
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        displayResults(result);
+        document.getElementById('premium-results').style.display = 'none';
+      } catch (error) {
+        showError('Ошибка анализа: ' + error.message);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    async function analyzePremium() {
+      const data = {
+        followers: parseInt(document.getElementById('followers-premium').value),
+        likes: parseInt(document.getElementById('likes-premium').value),
+        views: parseInt(document.getElementById('views-premium').value),
+        comments: parseInt(document.getElementById('comments-premium').value),
+        reposts: parseInt(document.getElementById('reposts-premium').value),
+        platform: document.getElementById('platform-premium').value,
+        initData: tg.initData
+      };
+
+      if (!data.followers || !data.likes) {
+        showError('Заполни подписчиков и лайки');
+        return;
+      }
+
+      showLoading(true);
+      try {
+        // First show payment
+        tg.sendData(JSON.stringify({ action: 'premium_payment', stars: 5 }));
+
+        const response = await fetch('/api/premium-analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        displayPremiumResults(result);
+      } catch (error) {
+        showError('Ошибка: ' + error.message);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function displayResults(result) {
+      const { analysis, preview } = result;
+
+      document.getElementById('engagement').textContent = analysis.engagement_rate.toFixed(2) + '%';
+      document.getElementById('like-ratio').textContent = (analysis.like_to_view_ratio * 100).toFixed(2) + '%';
+      document.getElementById('comment-rate').textContent = analysis.comment_rate.toFixed(2) + '%';
+      document.getElementById('quality-score').textContent = analysis.quality_score;
+      document.getElementById('growth-forecast').textContent = preview.potential_growth > analysis.followers
+        ? '+' + (preview.potential_growth - analysis.followers)
+        : analysis.followers - preview.potential_growth;
+      document.getElementById('recommendation').textContent = preview.recommendation;
+
+      const score = analysis.quality_score;
+      const label = score >= 70 ? '✅ Хорошо' : score >= 50 ? '⚠️ Нормально' : '❌ Плохо';
+      document.getElementById('quality-label').textContent = label;
+
+      document.getElementById('results').classList.add('show');
+      document.getElementById('error').style.display = 'none';
+    }
+
+    function displayPremiumResults(result) {
+      displayResults({ analysis: result.data, preview: result.data });
+
+      const recs = result.data.detailed_recommendations;
+      document.getElementById('detailed-recs').innerHTML = recs.map(r =>
+        `<div class="recommendation">${r}</div>`
+      ).join('');
+
+      document.getElementById('your-engagement').textContent =
+        result.data.competitor_analysis.your_avg_engagement.toFixed(2) + '%';
+      document.getElementById('position').textContent =
+        result.data.competitor_analysis.position === 'выше среднего' ? '✅ Выше среднего' : '⚠️ Ниже среднего';
+      document.getElementById('content-strategy').textContent = result.data.content_strategy;
+
+      document.getElementById('premium-results').style.display = 'block';
+    }
+
+    function showError(msg) {
+      const errorEl = document.getElementById('error');
+      errorEl.textContent = msg;
+      errorEl.style.display = 'block';
+    }
+
+    function showLoading(show) {
+      document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
+  </script>
+</body>
+</html>
