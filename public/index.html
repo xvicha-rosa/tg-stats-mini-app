@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StatsFlow - Social Analytics</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&family=Crimson+Text:ital@0;1&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -12,163 +13,279 @@
       box-sizing: border-box;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes slideInLeft {
-      from { opacity: 0; transform: translateX(-20px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-
-    @keyframes glow {
-      0%, 100% { text-shadow: 0 0 10px rgba(100, 200, 255, 0.3); }
-      50% { text-shadow: 0 0 20px rgba(100, 200, 255, 0.6); }
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-8px); }
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-
-    @keyframes shimmer {
-      0% { background-position: -1000px 0; }
-      100% { background-position: 1000px 0; }
-    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes glow { 0%, 100% { text-shadow: 0 0 10px rgba(237, 124, 48, 0.3); } 50% { text-shadow: 0 0 20px rgba(237, 124, 48, 0.6); } }
+    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
 
     body {
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1624 100%);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #faf6f0 0%, #fff5e6 50%, #fef9f3 100%);
       min-height: 100vh;
-      padding: 16px;
-      color: #e0e0e0;
-      overflow-x: hidden;
+      padding: 0;
+      color: #3a3a3a;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
-    .background-glow {
+    .background-pattern {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at 20% 50%, rgba(100, 200, 255, 0.05) 0%, transparent 50%),
-                  radial-gradient(circle at 80% 80%, rgba(50, 150, 255, 0.03) 0%, transparent 50%);
+      background-image:
+        radial-gradient(circle at 20% 50%, rgba(237, 124, 48, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(248, 238, 173, 0.08) 0%, transparent 50%);
       pointer-events: none;
       z-index: 0;
     }
 
     .container {
-      max-width: 500px;
-      margin: 0 auto;
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      padding-bottom: 80px;
       position: relative;
       z-index: 1;
-      animation: fadeIn 0.6s ease-out;
     }
 
-    .header {
-      text-align: center;
-      margin-bottom: 32px;
-      animation: slideUp 0.8s ease-out;
-    }
-
-    .logo {
-      font-size: 48px;
-      margin-bottom: 8px;
-      animation: float 3s ease-in-out infinite;
-    }
-
-    .title {
-      font-size: 32px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #64c8ff 0%, #3d9cff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 4px;
-      animation: glow 3s ease-in-out infinite;
-    }
-
-    .subtitle {
-      font-size: 13px;
-      color: #7a8aa0;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-    }
-
-    .card {
-      background: rgba(20, 26, 47, 0.7);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(100, 200, 255, 0.1);
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 16px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      transition: all 0.3s ease;
-      animation: slideUp 0.8s ease-out;
-    }
-
-    .card:hover {
-      border-color: rgba(100, 200, 255, 0.2);
-      background: rgba(20, 26, 47, 0.8);
-      box-shadow: 0 12px 40px rgba(100, 200, 255, 0.15);
-    }
-
-    .tabs {
+    .tabs-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.95));
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(237, 124, 48, 0.1);
+      z-index: 100;
       display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
-      background: rgba(10, 14, 39, 0.5);
-      padding: 4px;
-      border-radius: 12px;
-      border: 1px solid rgba(100, 200, 255, 0.05);
+      justify-content: space-around;
+      height: 70px;
     }
 
     .tab-btn {
       flex: 1;
-      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
       border: none;
       background: transparent;
-      color: #7a8aa0;
-      border-radius: 10px;
+      color: #b0b0b0;
+      font-size: 12px;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 14px;
       transition: all 0.3s ease;
       position: relative;
     }
 
-    .tab-btn:hover {
-      color: #64c8ff;
-      background: rgba(100, 200, 255, 0.05);
+    .tab-btn.active {
+      color: #ed7c30;
     }
 
-    .tab-btn.active {
-      background: linear-gradient(135deg, rgba(100, 200, 255, 0.2) 0%, rgba(61, 156, 255, 0.1) 100%);
-      color: #64c8ff;
-      border: 1px solid rgba(100, 200, 255, 0.2);
-      box-shadow: 0 4px 12px rgba(100, 200, 255, 0.15);
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 24px;
+      height: 3px;
+      background: linear-gradient(90deg, #F8EDAD, #ED7C30);
+      border-radius: 2px;
+    }
+
+    .tab-btn:hover {
+      color: #ed7c30;
+    }
+
+    .tab-icon {
+      font-size: 24px;
+    }
+
+    .tab-content {
+      display: none;
+      animation: slideUp 0.5s ease-out;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Home Tab */
+    .home-hero {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 20px;
+    }
+
+    .home-logo {
+      font-size: 56px;
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .home-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ED7C30 0%, #F8EDAD 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .home-subtitle {
+      font-family: 'Crimson Text', serif;
+      font-size: 18px;
+      font-style: italic;
+      color: #6d5d52;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #3a3a3a;
+      margin: 32px 0 16px 0;
+      position: relative;
+      padding-left: 12px;
+    }
+
+    .section-title::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(180deg, #ED7C30, #F8EDAD);
+      border-radius: 2px;
+    }
+
+    .how-it-works {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .step {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      border-left: 4px solid #ED7C30;
+      box-shadow: 0 2px 8px rgba(237, 124, 48, 0.08);
+      transition: all 0.3s ease;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #5a5a5a;
+    }
+
+    .step:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 16px rgba(237, 124, 48, 0.12);
+    }
+
+    .step strong {
+      color: #ED7C30;
+      font-weight: 600;
+    }
+
+    .pricing-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .pricing-card {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      border: 2px solid #f0e5d8;
+      transition: all 0.3s ease;
+    }
+
+    .pricing-card:hover {
+      border-color: #ED7C30;
+      box-shadow: 0 8px 24px rgba(237, 124, 48, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .pricing-card.premium {
+      background: linear-gradient(135deg, rgba(237, 124, 48, 0.05), rgba(248, 238, 173, 0.1));
+      border-color: #ED7C30;
+    }
+
+    .pricing-label {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #3a3a3a;
+      margin-bottom: 8px;
+    }
+
+    .pricing-price {
+      font-size: 12px;
+      color: #ED7C30;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .pricing-desc {
+      font-size: 13px;
+      color: #7a7a7a;
+      line-height: 1.6;
+    }
+
+    .features {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .feature-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px;
+      background: white;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #5a5a5a;
+      line-height: 1.5;
+    }
+
+    .feature-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* Analysis Tab */
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 12px rgba(237, 124, 48, 0.08);
+      border: 1px solid rgba(237, 124, 48, 0.1);
     }
 
     .input-group {
       margin-bottom: 20px;
-      animation: slideInLeft 0.6s ease-out;
     }
 
     label {
       display: block;
       font-size: 13px;
-      color: #64c8ff;
+      color: #ED7C30;
       margin-bottom: 8px;
       font-weight: 600;
       text-transform: uppercase;
@@ -178,11 +295,11 @@
     textarea {
       width: 100%;
       padding: 14px;
-      background: rgba(10, 14, 39, 0.6);
-      border: 1px solid rgba(100, 200, 255, 0.1);
+      background: #faf6f0;
+      border: 1px solid #e8dcc8;
       border-radius: 12px;
-      color: #e0e0e0;
-      font-size: 15px;
+      color: #3a3a3a;
+      font-size: 14px;
       font-family: inherit;
       resize: vertical;
       min-height: 100px;
@@ -191,13 +308,9 @@
 
     textarea:focus {
       outline: none;
-      border-color: rgba(100, 200, 255, 0.4);
-      background: rgba(10, 14, 39, 0.8);
-      box-shadow: 0 0 20px rgba(100, 200, 255, 0.1);
-    }
-
-    textarea::placeholder {
-      color: #5a6a80;
+      border-color: #ED7C30;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(237, 124, 48, 0.1);
     }
 
     .btn {
@@ -205,74 +318,108 @@
       padding: 16px;
       border: none;
       border-radius: 12px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
       margin-bottom: 12px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: rgba(255, 255, 255, 0.1);
-      transition: left 0.3s ease;
-    }
-
-    .btn:hover::before {
-      left: 100%;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #64c8ff 0%, #3d9cff 100%);
-      color: #0a0e27;
-      box-shadow: 0 4px 20px rgba(100, 200, 255, 0.3);
+      background: linear-gradient(135deg, #ED7C30 0%, #F8EDAD 100%);
+      color: white;
+      box-shadow: 0 4px 16px rgba(237, 124, 48, 0.3);
     }
 
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(100, 200, 255, 0.4);
-    }
-
-    .btn-primary:active {
-      transform: translateY(0);
-    }
-
-    .btn-premium {
-      background: linear-gradient(135deg, #ff6b9d 0%, #c2185b 100%);
-      color: white;
-      box-shadow: 0 4px 20px rgba(255, 107, 157, 0.3);
-    }
-
-    .btn-premium:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(255, 107, 157, 0.4);
+      box-shadow: 0 6px 24px rgba(237, 124, 48, 0.4);
     }
 
     .btn-secondary {
-      background: rgba(100, 200, 255, 0.1);
-      color: #64c8ff;
-      border: 1px solid rgba(100, 200, 255, 0.2);
+      background: white;
+      color: #ED7C30;
+      border: 2px solid #ED7C30;
     }
 
     .btn-secondary:hover {
-      background: rgba(100, 200, 255, 0.15);
-      border-color: rgba(100, 200, 255, 0.3);
+      background: #faf6f0;
     }
 
-    .tab-content {
-      display: none;
+    .profile-preview {
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      background: #faf6f0;
+      border-radius: 12px;
+      margin-bottom: 20px;
     }
 
-    .tab-content.active {
-      display: block;
-      animation: slideUp 0.4s ease-out;
+    .profile-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ED7C30, #F8EDAD);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+
+    .profile-info {
+      flex: 1;
+    }
+
+    .profile-name {
+      font-weight: 600;
+      color: #3a3a3a;
+      margin-bottom: 4px;
+    }
+
+    .profile-stats {
+      font-size: 12px;
+      color: #8a8a8a;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .metric-box {
+      background: linear-gradient(135deg, rgba(237, 124, 48, 0.05), rgba(248, 238, 173, 0.1));
+      border: 1px solid rgba(237, 124, 48, 0.1);
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ED7C30;
+      margin-bottom: 4px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: #8a8a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .quality-score {
+      font-family: 'Playfair Display', serif;
+      font-size: 48px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ED7C30, #F8EDAD);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+      margin: 20px 0;
     }
 
     .results {
@@ -281,28 +428,17 @@
 
     .results.show {
       display: block;
-      animation: slideUp 0.5s ease-out;
-    }
-
-    .error, .info {
-      padding: 14px;
-      border-radius: 12px;
-      display: none;
-      margin-bottom: 16px;
-      font-size: 14px;
-      animation: slideUp 0.4s ease-out;
     }
 
     .error {
-      background: rgba(255, 107, 157, 0.1);
-      border: 1px solid rgba(255, 107, 157, 0.3);
-      color: #ff8db3;
-    }
-
-    .info {
-      background: rgba(100, 200, 255, 0.1);
-      border: 1px solid rgba(100, 200, 255, 0.3);
-      color: #64c8ff;
+      background: #ffe0cc;
+      border-left: 4px solid #ED7C30;
+      padding: 12px;
+      border-radius: 8px;
+      color: #d65a1a;
+      display: none;
+      margin-bottom: 16px;
+      font-size: 13px;
     }
 
     .loading {
@@ -312,383 +448,406 @@
     }
 
     .loader {
-      width: 48px;
-      height: 48px;
-      border: 3px solid rgba(100, 200, 255, 0.2);
-      border-top-color: #64c8ff;
+      width: 40px;
+      height: 40px;
+      border: 3px solid #f0e5d8;
+      border-top-color: #ED7C30;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       margin: 0 auto;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .profile-preview {
-      display: flex;
-      gap: 16px;
-      padding: 16px;
-      background: rgba(10, 14, 39, 0.6);
-      border: 1px solid rgba(100, 200, 255, 0.1);
-      border-radius: 12px;
-      margin-bottom: 20px;
-      animation: slideUp 0.5s ease-out;
-    }
-
-    .profile-avatar {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #64c8ff 0%, #3d9cff 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      flex-shrink: 0;
-      box-shadow: 0 4px 16px rgba(100, 200, 255, 0.3);
-    }
-
-    .profile-info {
-      flex: 1;
+    /* Premium Tab */
+    .premium-grid {
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      gap: 16px;
     }
 
-    .profile-name {
-      font-weight: 600;
-      color: #e0e0e0;
-      margin-bottom: 4px;
-      font-size: 15px;
-    }
-
-    .profile-stats {
-      font-size: 12px;
-      color: #7a8aa0;
-    }
-
-    .section-title {
-      font-size: 13px;
-      color: #64c8ff;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin: 24px 0 16px 0;
-    }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .metric-box {
-      background: rgba(10, 14, 39, 0.6);
-      border: 1px solid rgba(100, 200, 255, 0.1);
-      padding: 16px;
-      border-radius: 12px;
-      text-align: center;
+    .premium-tier {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      border: 2px solid #f0e5d8;
       transition: all 0.3s ease;
     }
 
-    .metric-box:hover {
-      border-color: rgba(100, 200, 255, 0.2);
-      background: rgba(10, 14, 39, 0.8);
-      transform: translateY(-4px);
-      box-shadow: 0 4px 16px rgba(100, 200, 255, 0.1);
+    .premium-tier:hover {
+      border-color: #ED7C30;
+      box-shadow: 0 8px 24px rgba(237, 124, 48, 0.15);
     }
 
-    .metric-value {
-      font-size: 24px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #64c8ff 0%, #3d9cff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 6px;
-    }
-
-    .metric-label {
-      font-size: 12px;
-      color: #7a8aa0;
-      font-weight: 500;
-    }
-
-    .quality-score {
-      font-size: 56px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #64c8ff 0%, #3d9cff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-align: center;
-      margin: 24px 0;
-      animation: glow 3s ease-in-out infinite;
-    }
-
-    .quality-badge {
+    .tier-badge {
       display: inline-block;
-      background: linear-gradient(135deg, rgba(100, 200, 255, 0.2) 0%, rgba(61, 156, 255, 0.1) 100%);
-      color: #64c8ff;
-      padding: 8px 16px;
+      background: linear-gradient(135deg, #ED7C30, #F8EDAD);
+      color: white;
+      padding: 6px 12px;
       border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      border: 1px solid rgba(100, 200, 255, 0.2);
-      text-align: center;
-      width: 100%;
-      box-shadow: 0 4px 12px rgba(100, 200, 255, 0.1);
-    }
-
-    .growth-forecast {
-      background: linear-gradient(135deg, rgba(100, 200, 255, 0.1) 0%, rgba(61, 156, 255, 0.05) 100%);
-      border: 1px solid rgba(100, 200, 255, 0.2);
-      padding: 20px;
-      border-radius: 12px;
-      margin-top: 16px;
-      text-align: center;
-    }
-
-    .growth-label {
-      font-size: 12px;
-      color: #7a8aa0;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      font-size: 11px;
+      font-weight: 700;
       margin-bottom: 12px;
     }
 
-    .growth-number {
-      font-size: 40px;
+    .tier-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
       font-weight: 700;
-      background: linear-gradient(135deg, #64c8ff 0%, #3d9cff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: #3a3a3a;
       margin-bottom: 8px;
     }
 
-    .recommendation {
-      background: rgba(255, 193, 7, 0.05);
-      border-left: 3px solid #ffc107;
-      padding: 14px;
-      border-radius: 8px;
-      margin-top: 16px;
-      color: #ffd54f;
-      line-height: 1.6;
+    .tier-price {
       font-size: 14px;
-    }
-
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 14px 0;
-      border-bottom: 1px solid rgba(100, 200, 255, 0.05);
-    }
-
-    .stat-row:last-child {
-      border-bottom: none;
-    }
-
-    .stat-label {
-      color: #7a8aa0;
-      font-weight: 500;
-      font-size: 14px;
-    }
-
-    .stat-value {
-      background: linear-gradient(135deg, #64c8ff 0%, #3d9cff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: #ED7C30;
       font-weight: 600;
-      font-size: 14px;
+      margin-bottom: 12px;
     }
 
-    .action-buttons {
+    .tier-features {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tier-feature {
+      font-size: 13px;
+      color: #5a5a5a;
       display: flex;
       gap: 8px;
-      margin-top: 20px;
+      align-items: center;
     }
 
-    .action-buttons .btn {
-      flex: 1;
-      margin-bottom: 0;
-      padding: 14px;
-      font-size: 14px;
+    /* Profile Tab */
+    .profile-section {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
     }
 
-    .premium-badge {
-      display: inline-block;
-      background: linear-gradient(135deg, #ff6b9d 0%, #c2185b 100%);
-      color: white;
-      padding: 4px 8px;
-      border-radius: 20px;
-      font-size: 10px;
+    .profile-section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      color: #3a3a3a;
+      margin-bottom: 12px;
+    }
+
+    .profile-section-content {
+      font-size: 13px;
+      color: #5a5a5a;
+      line-height: 1.8;
+    }
+
+    .profile-section-content a {
+      color: #ED7C30;
+      text-decoration: none;
+      font-weight: 600;
     }
 
     small {
       display: block;
-      color: #5a6a80;
+      color: #8a8a8a;
       margin-top: 6px;
       font-size: 12px;
     }
 
-    .premium-section {
-      border-top: 1px solid rgba(100, 200, 255, 0.1);
-      padding-top: 24px;
-      margin-top: 24px;
+    .divider {
+      height: 1px;
+      background: rgba(237, 124, 48, 0.1);
+      margin: 16px 0;
     }
 
-    .tips-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .tip-item {
-      background: rgba(10, 14, 39, 0.6);
-      border-left: 3px solid #64c8ff;
-      padding: 12px;
-      border-radius: 8px;
-      color: #e0e0e0;
-      font-size: 14px;
+    .service-card {
+      background: linear-gradient(135deg, rgba(237, 124, 48, 0.05), rgba(248, 238, 173, 0.1));
+      border: 2px solid rgba(237, 124, 48, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
       transition: all 0.3s ease;
     }
 
-    .tip-item:hover {
-      background: rgba(10, 14, 39, 0.8);
-      transform: translateX(4px);
+    .service-card:hover {
+      border-color: #ED7C30;
+      background: linear-gradient(135deg, rgba(237, 124, 48, 0.15), rgba(248, 238, 173, 0.2));
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(237, 124, 48, 0.2);
+    }
+
+    .service-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .service-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #3a3a3a;
+      margin-bottom: 4px;
+    }
+
+    .service-time {
+      font-size: 11px;
+      color: #ED7C30;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
   </style>
 </head>
 <body>
-  <div class="background-glow"></div>
+  <div class="background-pattern"></div>
 
   <div class="container">
-    <div class="header">
-      <div class="logo">📊</div>
-      <div class="title">StatsFlow</div>
-      <div class="subtitle">Social Analytics Engine</div>
-    </div>
-
-    <div class="card">
-      <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('free')">Quick Scan</button>
-        <button class="tab-btn" onclick="switchTab('premium')">
-          <span class="premium-badge">Pro</span>
-        </button>
+    <!-- Home Tab -->
+    <div id="home" class="tab-content active">
+      <div class="home-hero">
+        <div class="home-logo">📊</div>
+        <div class="home-title">StatsFlow</div>
+        <div class="home-subtitle">социальный аналитический движок</div>
       </div>
 
-      <div id="free" class="tab-content active">
-        <div class="input-group">
-          <label>📍 Profile Link</label>
-          <textarea id="profile-url" placeholder="paste profile link...&#10;&#10;• tiktok.com/@username&#10;• instagram.com/username&#10;• youtube.com/@channel"></textarea>
-          <small>TikTok, Instagram, or YouTube</small>
-        </div>
-
-        <button class="btn btn-primary" onclick="scrapeAndAnalyze('free')">
-          Analyze Profile →
-        </button>
-      </div>
-
-      <div id="premium" class="tab-content">
-        <div class="input-group">
-          <label>📍 Profile Link</label>
-          <textarea id="profile-url-premium" placeholder="paste profile link...&#10;&#10;• tiktok.com/@username&#10;• instagram.com/username&#10;• youtube.com/@channel"></textarea>
-          <small>TikTok, Instagram, or YouTube</small>
-        </div>
-
-        <button class="btn btn-premium" onclick="scrapeAndAnalyze('premium')">
-          ⭐ Full Analysis (5 Stars)
-        </button>
-      </div>
-    </div>
-
-    <div class="error" id="error"></div>
-    <div class="info" id="info"></div>
-    <div class="loading" id="loading"><div class="loader"></div></div>
-
-    <div class="results" id="results">
       <div class="card">
-        <div class="profile-preview" id="profile-preview"></div>
+        <p style="font-family: 'Crimson Text', serif; font-size: 18px; font-style: italic; color: #6d5d52; text-align: center; line-height: 1.8; margin-bottom: 20px;">
+          Узнай свой потенциал.<br>
+          Подними числа.<br>
+          Завоюй аудиторию.
+        </p>
 
-        <div class="section-title">📈 Key Metrics</div>
-        <div class="metrics-grid" id="basic-metrics"></div>
-
-        <div class="quality-score" id="quality-score">75</div>
-        <div style="text-align: center; margin-bottom: 20px;">
-          <span class="quality-badge" id="quality-label">Great</span>
+        <h2 class="section-title">Как это работает?</h2>
+        <div class="how-it-works">
+          <div class="step">Вставь ссылку на профиль (TikTok, Instagram, YouTube)</div>
+          <div class="step">Получи анализ за <strong>секунду</strong></div>
+          <div class="step">Узнай, как расти на <strong>30% в неделю</strong></div>
+          <div class="step">Стратегия на <strong>каждый пост</strong></div>
         </div>
 
-        <div class="section-title">🚀 Growth Forecast</div>
-        <div class="growth-forecast">
-          <div class="growth-label">Potential Growth • Next Week</div>
-          <div class="growth-number" id="growth-forecast">+150</div>
+        <h2 class="section-title">Тарифы</h2>
+        <div class="pricing-cards">
+          <div class="pricing-card">
+            <div class="pricing-label">Бесплатно</div>
+            <div class="pricing-desc">быстрая оценка + прогноз роста</div>
+          </div>
+          <div class="pricing-card premium">
+            <div class="pricing-label">Premium</div>
+            <div class="pricing-price">50⭐</div>
+            <div class="pricing-desc">полный анализ + рекомендации + стратегия</div>
+          </div>
         </div>
 
-        <div class="recommendation" id="recommendation"></div>
-
-        <div id="premium-results" style="display: none;" class="premium-section">
-          <div class="section-title">🎯 Recommendations</div>
-          <div id="detailed-recs"></div>
-
-          <div class="section-title">📊 Competitor Analysis</div>
-          <div class="stat-row">
-            <span class="stat-label">Your Engagement</span>
-            <span class="stat-value" id="your-engagement">0%</span>
+        <h2 class="section-title">Почему StatsFlow</h2>
+        <div class="features">
+          <div class="feature-item">
+            <div class="feature-icon">✨</div>
+            <div>Точные данные с профилей</div>
           </div>
-          <div class="stat-row">
-            <span class="stat-label">Market Average</span>
-            <span class="stat-value">2.5%</span>
+          <div class="feature-item">
+            <div class="feature-icon">📈</div>
+            <div>Персональная стратегия роста</div>
           </div>
-          <div class="stat-row">
-            <span class="stat-label">Your Position</span>
-            <span class="stat-value" id="position">↓ Below Avg</span>
+          <div class="feature-item">
+            <div class="feature-icon">🚀</div>
+            <div>Результаты за неделю</div>
           </div>
+          <div class="feature-item">
+            <div class="feature-icon">💎</div>
+            <div>Premium аналитика</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-          <div class="section-title">💡 Content Strategy</div>
-          <p id="content-strategy" style="color: #e0e0e0; line-height: 1.7; font-size: 14px;"></p>
-
-          <div class="section-title">🔥 Top Tips</div>
-          <div class="tips-list" id="top-tips"></div>
+    <!-- Analysis + Premium + Services Tab (Merged) -->
+    <div id="analysis" class="tab-content">
+      <!-- ANALYSIS SECTION -->
+      <div class="card">
+        <h2 class="section-title">Анализ профиля</h2>
+        <div class="input-group">
+          <label>📍 Профиль</label>
+          <textarea id="profile-url" placeholder="вставь ссылку...&#10;&#10;tiktok.com/@username&#10;instagram.com/username&#10;youtube.com/@channel"></textarea>
+          <small>TikTok, Instagram или YouTube</small>
         </div>
 
-        <div class="action-buttons">
-          <button class="btn btn-secondary" onclick="resetForm()">← Back</button>
-          <button class="btn btn-primary" onclick="switchTab('premium')" id="upgrade-btn">
-            Pro Details →
-          </button>
+        <button class="btn btn-primary" onclick="scrapeAndAnalyze()">
+          Анализировать →
+        </button>
+      </div>
+
+      <div class="error" id="error"></div>
+      <div class="loading" id="loading"><div class="loader"></div></div>
+
+      <div class="results" id="results">
+        <div class="card">
+          <div class="profile-preview" id="profile-preview"></div>
+
+          <div style="margin-top: 20px;">
+            <h3 class="section-title">Метрики</h3>
+            <div class="metrics-grid" id="basic-metrics"></div>
+
+            <div class="quality-score" id="quality-score">75</div>
+
+            <div class="metrics-grid" style="margin-top: 16px;">
+              <div class="metric-box">
+                <div class="metric-label">Статус</div>
+                <div style="font-size: 14px; color: #3a3a3a; font-weight: 600; margin-top: 6px;" id="quality-label">Хорошо</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-label">Прогноз</div>
+                <div style="font-size: 16px; color: #ED7C30; font-weight: 700; margin-top: 6px;" id="growth-forecast">+150</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div style="background: #fff5e6; border-left: 4px solid #ED7C30; padding: 14px; border-radius: 8px; margin-top: 16px; color: #6d5d52; font-size: 13px; line-height: 1.6;" id="recommendation"></div>
+
+          <div style="margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="resetAnalysis()">← Новый анализ</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREMIUM SECTION -->
+      <div class="card">
+        <h2 class="section-title">Premium подписка</h2>
+        <div class="premium-grid">
+          <div class="premium-tier">
+            <span class="tier-badge">ПОПУЛЯРНЫЙ</span>
+            <div class="tier-title">Premium</div>
+            <div class="tier-price">50 ⭐ Telegram Stars</div>
+            <div class="tier-features">
+              <div class="tier-feature">✓ Полный анализ профиля</div>
+              <div class="tier-feature">✓ Персональная стратегия</div>
+              <div class="tier-feature">✓ Анализ конкурентов</div>
+              <div class="tier-feature">✓ Топ-5 рекомендаций</div>
+              <div class="tier-feature">✓ История анализов</div>
+            </div>
+            <button class="btn btn-primary" onclick="buyPremium()">Купить Premium →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SERVICES SECTION -->
+      <div class="card">
+        <h2 class="section-title">Дополнительные услуги</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="service-card" onclick="requestService('Монтаж видео', '🎬 Профессиональный монтаж. Цветокоррекция, эффекты, музыка. Срок: 1-24 часа. Цена: от 500 до 10,000₽')">
+            <div class="service-icon">🎬</div>
+            <div class="service-name">Монтаж</div>
+            <div class="service-time">1-24ч</div>
+          </div>
+
+          <div class="service-card" onclick="requestService('Съемка контента', '📹 Снимаем видео под твой стиль. Все права по госту. Сдача до 3 дней. Цена: от 500 до 10,000₽')">
+            <div class="service-icon">📹</div>
+            <div class="service-name">Съемка</div>
+            <div class="service-time">до 3дн</div>
+          </div>
+
+          <div class="service-card" onclick="requestService('Личное ведение аккаунта', '👤 Полный контроль аккаунта. Постим, отвечаем, растим. От 10k до 100k подписчиков. Цена: от 500 до 10,000₽')">
+            <div class="service-icon">👤</div>
+            <div class="service-name">Ведение</div>
+            <div class="service-time">ежедн</div>
+          </div>
+
+          <div class="service-card" onclick="requestService('Контент-план', '📋 Месячный план постов. Идеи, сценарии, расписание. Готово к съемке. Цена: от 500 до 10,000₽')">
+            <div class="service-icon">📋</div>
+            <div class="service-name">План</div>
+            <div class="service-time">1мес</div>
+          </div>
+
+          <div class="service-card" onclick="requestService('Хештеги и описание', '🔍 SEO-оптимизированные описания. Минус 40% потери просмотров через тексты. Цена: от 500 до 10,000₽')">
+            <div class="service-icon">🔍</div>
+            <div class="service-name">Хештеги</div>
+            <div class="service-time">быстро</div>
+          </div>
+
+          <div class="service-card" onclick="requestService('Музыка подбор', '🎵 Подбираем треки под вирусность. Лицензированная, трендовая, под твой стиль. Цена: от 500 до 10,000₽')">
+            <div class="service-icon">🎵</div>
+            <div class="service-name">Музыка</div>
+            <div class="service-time">24ч</div>
+          </div>
+
+          <div class="service-card" onclick="requestService('Постинг-бот', '🤖 Автоматический постинг по расписанию. Не пропустишь пиковые часы. Цена: от 500 до 10,000₽')">
+            <div class="service-icon">🤖</div>
+            <div class="service-name">Бот</div>
+            <div class="service-time">авто</div>
+          </div>
+
+          <div class="service-card" onclick="requestService('Консультация эксперта', '💬 30мин с экспертом. Стратегия, проблемы, вопросы. Индивидуальный разбор. Цена: от 500 до 10,000₽')">
+            <div class="service-icon">💬</div>
+            <div class="service-name">Консульт</div>
+            <div class="service-time">30мин</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Tab -->
+    <div id="profile" class="tab-content">
+      <div class="profile-section">
+        <div class="profile-section-title">Профиль</div>
+        <div class="profile-section-content">
+          Здесь появится твоя информация после первого анализа.
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">Поддержка</div>
+        <div class="profile-section-content">
+          Возникли вопросы? Свяжись с нами:<br><br>
+          📧 <a href="mailto:support@statsflow.app">support@statsflow.app</a><br>
+          💬 <a href="https://t.me/statsflow">Telegram чат</a>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">О сервисе</div>
+        <div class="profile-section-content">
+          StatsFlow помогает создателям контента анализировать свои профили и расти быстрее.<br><br>
+          Версия 1.0 • 2024
         </div>
       </div>
     </div>
   </div>
 
+  <div class="tabs-container">
+    <button class="tab-btn active" onclick="switchTab('home')">
+      <div class="tab-icon">🏠</div>
+      <div>StatsFlow</div>
+    </button>
+    <button class="tab-btn" onclick="switchTab('analysis')">
+      <div class="tab-icon">📊</div>
+      <div>Анализ</div>
+    </button>
+    <button class="tab-btn" onclick="switchTab('profile')">
+      <div class="tab-icon">👤</div>
+      <div>Профиль</div>
+    </button>
+  </div>
+
   <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
-    tg.setHeaderColor('#0a0e27');
+    tg.setHeaderColor('#faf6f0');
 
-    let currentAnalysis = null;
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
 
-    function switchTab(tab) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.getElementById(tabName).classList.add('active');
       event.target.closest('.tab-btn').classList.add('active');
-      document.getElementById(tab).classList.add('active');
     }
 
-    async function scrapeAndAnalyze(mode) {
-      const profileUrl = mode === 'free'
-        ? document.getElementById('profile-url').value.trim()
-        : document.getElementById('profile-url-premium').value.trim();
-
+    async function scrapeAndAnalyze() {
+      const profileUrl = document.getElementById('profile-url').value.trim();
       if (!profileUrl) {
-        showError('paste a profile link');
+        showError('Вставь ссылку на профиль');
         return;
       }
 
@@ -702,7 +861,7 @@
 
         if (!scrapeRes.ok) {
           const err = await scrapeRes.json();
-          throw new Error(err.error || 'Scraping error');
+          throw new Error(err.error || 'Ошибка скрейпинга');
         }
 
         const scrapedData = await scrapeRes.json();
@@ -724,9 +883,7 @@
         });
 
         const analysis = await analyzeRes.json();
-        currentAnalysis = { ...analysis, profile: stats, mode };
-
-        displayResults(analysis, stats, mode);
+        displayResults(analysis, stats);
       } catch (error) {
         showError(error.message);
       } finally {
@@ -734,41 +891,41 @@
       }
     }
 
-    function displayResults(analysis, profile, mode) {
+    function displayResults(analysis, profile) {
       const { analysis: data, preview } = analysis;
 
       const emoji = { tiktok: '🎵', instagram: '📷', youtube: '📺' }[profile.platform] || '📊';
       document.getElementById('profile-preview').innerHTML = `
         <div class="profile-avatar">${emoji}</div>
         <div class="profile-info">
-          <div class="profile-name">${profile.username || 'Profile'}</div>
-          <div class="profile-stats">${data.followers.toLocaleString()} followers • ${profile.platform}</div>
+          <div class="profile-name">${profile.username || 'Профиль'}</div>
+          <div class="profile-stats">${data.followers.toLocaleString()} подписчиков • ${profile.platform}</div>
         </div>
       `;
 
       const metricsHtml = `
         <div class="metric-box">
           <div class="metric-value">${data.followers.toLocaleString()}</div>
-          <div class="metric-label">Followers</div>
+          <div class="metric-label">Подписчики</div>
         </div>
         <div class="metric-box">
           <div class="metric-value">${Math.round(data.engagement_rate)}</div>
-          <div class="metric-label">% Engagement</div>
+          <div class="metric-label">% Энгейджмент</div>
         </div>
         <div class="metric-box">
           <div class="metric-value">${data.likes.toLocaleString()}</div>
-          <div class="metric-label">Likes</div>
+          <div class="metric-label">Лайки</div>
         </div>
         <div class="metric-box">
           <div class="metric-value">${Math.round(data.comment_rate * 100)}</div>
-          <div class="metric-label">% Comments</div>
+          <div class="metric-label">% Комментарии</div>
         </div>
       `;
       document.getElementById('basic-metrics').innerHTML = metricsHtml;
 
       document.getElementById('quality-score').textContent = data.quality_score;
       const score = data.quality_score;
-      const label = score >= 70 ? '✅ Excellent' : score >= 50 ? '⚠️ Good' : '❌ Needs Work';
+      const label = score >= 70 ? '✅ Отлично' : score >= 50 ? '⚠️ Хорошо' : '❌ Нужны улучшения';
       document.getElementById('quality-label').textContent = label;
 
       document.getElementById('growth-forecast').textContent =
@@ -778,63 +935,60 @@
 
       document.getElementById('recommendation').textContent = preview.recommendation;
 
-      if (mode === 'premium') {
-        displayPremiumResults(analysis);
-      } else {
-        document.getElementById('premium-results').style.display = 'none';
-      }
-
       document.getElementById('results').classList.add('show');
       document.getElementById('error').style.display = 'none';
     }
 
-    function displayPremiumResults(result) {
-      const { analysis: data } = result;
-
-      const recs = data.detailed_recommendations || [
-        '✨ Improve content quality',
-        '📅 Post consistently',
-        '💬 Engage with audience'
-      ];
-
-      document.getElementById('detailed-recs').innerHTML = recs.map(r =>
-        `<div class="tip-item">${r}</div>`
-      ).join('');
-
-      document.getElementById('your-engagement').textContent = data.engagement_rate.toFixed(1) + '%';
-      document.getElementById('position').textContent =
-        data.engagement_rate > 2.5 ? '✅ Above Avg' : '⚠️ Below Avg';
-      document.getElementById('content-strategy').textContent = data.content_strategy || 'Developing strategy...';
-
-      const tips = [
-        '🎬 Quality over Quantity — Focus on high-production content',
-        '💬 Engagement First — Respond to every comment quickly',
-        '⏰ Timing Matters — Post during peak hours (7-11 PM)',
-        '🎵 Trends Win — Use trending sounds and hashtags',
-        '✨ Consistency — Post 3-5 times per week minimum'
-      ];
-      document.getElementById('top-tips').innerHTML = tips.map(t =>
-        `<div class="tip-item">${t}</div>`
-      ).join('');
-
-      document.getElementById('premium-results').style.display = 'block';
-    }
-
-    function resetForm() {
+    function resetAnalysis() {
       document.getElementById('profile-url').value = '';
-      document.getElementById('profile-url-premium').value = '';
       document.getElementById('results').classList.remove('show');
-      document.getElementById('error').style.display = 'none';
     }
 
     function showError(msg) {
-      const errorEl = document.getElementById('error');
-      errorEl.textContent = msg;
-      errorEl.style.display = 'block';
+      document.getElementById('error').textContent = msg;
+      document.getElementById('error').style.display = 'block';
     }
 
     function showLoading(show) {
       document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
+
+    function requestService(serviceName, serviceDesc) {
+      const message = `🔔 Заказ услуги: ${serviceName}\n\n${serviceDesc}\n\nПожалуйста, свяжитесь со мной для уточнения деталей и стоимости.`;
+
+      // Send to bot via Telegram Web App
+      tg.sendData(JSON.stringify({
+        action: 'service_request',
+        service: serviceName,
+        message: message
+      }));
+
+      // Show confirmation
+      showInfo(`Запрос на "${serviceName}" отправлен. Ожидайте ответа в личных сообщениях.`);
+
+      setTimeout(() => {
+        document.getElementById('info').style.display = 'none';
+      }, 3000);
+    }
+
+    function buyPremium() {
+      tg.sendData(JSON.stringify({
+        action: 'buy_premium',
+        amount: 50,
+        currency: 'XTR'
+      }));
+    }
+
+    function showInfo(msg) {
+      const infoEl = document.getElementById('info');
+      if (!infoEl) {
+        const div = document.createElement('div');
+        div.id = 'info';
+        div.style.cssText = 'background: #d1ecf1; border-left: 4px solid #0c5460; padding: 12px; border-radius: 8px; color: #0c5460; display: block; margin-bottom: 16px; font-size: 13px;';
+        document.querySelector('.container').insertBefore(div, document.querySelector('.container').firstChild);
+      }
+      document.getElementById('info').textContent = msg;
+      document.getElementById('info').style.display = 'block';
     }
   </script>
 </body>
