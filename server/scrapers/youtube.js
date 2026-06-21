@@ -50,26 +50,49 @@ export async function scrapeYouTubeChannel(channelUrlOrId) {
 
 async function getChannelIdFromUrl(url) {
   try {
-    // Extract username/handle from URL
-    let query = url.split('/').pop().replace('@', '');
+    const clean = url.split('?')[0].split('#')[0].replace(/\/$/, '');
 
-    // Search for channel by name
-    const response = await axios.get(YOUTUBE_API_BASE + '/search', {
-      params: {
-        part: 'snippet',
-        type: 'channel',
-        q: query,
-        key: YOUTUBE_API_KEY,
-        maxResults: 1
-      }
-    });
-
-    if (response.data.items?.length) {
-      return response.data.items[0].snippet.channelId;
+    // 1) Прямой ID: /channel/UCxxxx
+    const channelMatch = clean.match(/\/channel\/(UC[\w-]+)/);
+    if (channelMatch) {
+      return channelMatch[1];
     }
+
+    // 2) Хэндл: /@username → channels?forHandle
+    const handleMatch = clean.match(/\/@([\w.\-]+)/);
+    if (handleMatch) {
+      const byHandle = await axios.get(YOUTUBE_API_BASE + '/channels', {
+        params: { part: 'id', forHandle: '@' + handleMatch[1], key: YOUTUBE_API_KEY }
+      });
+      if (byHandle.data.items?.length) {
+        return byHandle.data.items[0].id;
+      }
+    }
+
+    // 3) Старый username: /user/name → channels?forUsername
+    const userMatch = clean.match(/\/user\/([\w.\-]+)/);
+    if (userMatch) {
+      const byUser = await axios.get(YOUTUBE_API_BASE + '/channels', {
+        params: { part: 'id', forUsername: userMatch[1], key: YOUTUBE_API_KEY }
+      });
+      if (byUser.data.items?.length) {
+        return byUser.data.items[0].id;
+      }
+    }
+
+    // 4) Фолбэк: поиск по последнему сегменту URL (custom /c/name и пр.)
+    const query = handleMatch?.[1] || clean.split('/').filter(Boolean).pop();
+    const search = await axios.get(YOUTUBE_API_BASE + '/search', {
+      params: { part: 'snippet', type: 'channel', q: query, key: YOUTUBE_API_KEY, maxResults: 1 }
+    });
+    if (search.data.items?.length) {
+      return search.data.items[0].snippet.channelId;
+    }
+
     throw new Error('Channel not found');
   } catch (error) {
-    throw new Error(`Failed to resolve channel: ${error.message}`);
+    const detail = error.response?.data?.error?.message || error.message;
+    throw new Error(`Failed to resolve channel: ${detail}`);
   }
 }
 
