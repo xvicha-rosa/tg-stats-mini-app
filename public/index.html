@@ -381,11 +381,8 @@
 
         <div class="profile-section">
           <div class="profile-title">Поддержка</div>
-          <div class="profile-text">
-            📧 support@statsflow.app<br>
-            💬 Telegram чат<br><br>
-            Возникли вопросы? Напиши нам в любое время!
-          </div>
+          <div class="profile-text" style="margin-bottom: 12px;">Вопросы? Пиши в личку — ответим в любое время</div>
+          <button class="btn btn-primary" onclick="openSupport()" style="margin-top: 0;">💬 Написать @xvichals</button>
         </div>
 
         <div class="profile-section">
@@ -457,6 +454,10 @@
       }
     }
     initProfile();
+
+    function openSupport() {
+      tg.openTelegramLink('https://t.me/xvichals');
+    }
 
     function tab(name) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
