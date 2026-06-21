@@ -195,20 +195,20 @@
             <h3 class="section-title">Результаты</h3>
             <div class="metrics-grid">
               <div class="metric">
-                <div class="metric-val" id="res-followers">0</div>
-                <div class="metric-label">Подписчики</div>
+                <div class="metric-val" id="res-metric1-val">0</div>
+                <div class="metric-label" id="res-metric1-label">Подписчики</div>
               </div>
               <div class="metric">
-                <div class="metric-val" id="res-engagement">0</div>
-                <div class="metric-label">Энгейджмент <span class="info-icon" data-tooltip="% лайков, комментариев, репостов">ⓘ</span></div>
+                <div class="metric-val" id="res-metric2-val">0</div>
+                <div class="metric-label" id="res-metric2-label">Энгейджмент</div>
               </div>
               <div class="metric">
-                <div class="metric-val" id="res-score">75</div>
-                <div class="metric-label">Качество</div>
+                <div class="metric-val" id="res-metric3-val">0</div>
+                <div class="metric-label" id="res-metric3-label">Лайки/просмотр</div>
               </div>
               <div class="metric">
-                <div class="metric-text" id="res-banal" style="font-size: 12px; line-height: 1.4; color: #3E2723; padding: 8px 0;"></div>
-                <div class="metric-label">Совет</div>
+                <div class="metric-val" id="res-metric4-val">0</div>
+                <div class="metric-label" id="res-metric4-label">Комментарии</div>
               </div>
             </div>
             <button class="btn btn-primary" onclick="resetAnalysis()" style="margin-top: 16px;">← Новый анализ</button>
@@ -427,13 +427,22 @@
           throw new Error('Некорректный ответ анализа');
         }
 
-        document.getElementById('res-followers').textContent = analysis.analysis.followers.toLocaleString();
-        document.getElementById('res-engagement').textContent = Math.round(analysis.analysis.engagement_rate) + '%';
-        document.getElementById('res-score').textContent = analysis.analysis.quality_score;
+        // Metrics 1-4: Dynamic based on analysis
+        document.getElementById('res-metric1-val').textContent = analysis.analysis.followers.toLocaleString();
+        document.getElementById('res-metric1-label').textContent = 'Подписчики';
+
+        document.getElementById('res-metric2-val').textContent = Math.round(analysis.analysis.engagement_rate) + '%';
+        document.getElementById('res-metric2-label').textContent = 'Энгейджмент';
+
+        const likeToView = (analysis.analysis.like_to_view_ratio * 100).toFixed(1);
+        document.getElementById('res-metric3-val').textContent = likeToView + '%';
+        document.getElementById('res-metric3-label').textContent = 'Лайки/просмотр';
+
+        const commentRate = (analysis.analysis.comment_rate * 100).toFixed(1);
+        document.getElementById('res-metric4-val').textContent = commentRate + '%';
+        document.getElementById('res-metric4-label').textContent = 'Комментарии';
 
         if (analysis.free && analysis.free.advice) {
-          const banal1 = analysis.free.advice[0] ? analysis.free.advice[0].substring(0, 50) + '...' : 'Совет';
-          document.getElementById('res-banal').textContent = banal1;
           document.getElementById('advice-1').textContent = analysis.free.advice[0] || 'Совет не доступен';
           document.getElementById('advice-2').textContent = analysis.free.advice[1] || 'Совет не доступен';
           document.getElementById('advice-3').textContent = analysis.free.advice[2] || 'Инсайт не доступен';
