@@ -2,59 +2,88 @@ import axios from 'axios';
 
 const cache = new Map();
 const CACHE_TTL = 3600000; // 1 hour
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+const YOUTUBE_API_BASE = 'https://www.googleapis.com/youtube/v3';
 
 export async function scrapeYouTubeChannel(channelUrlOrId) {
   try {
-    // Normalize channel identifier
-    let channelUrl = channelUrlOrId;
-    if (!channelUrlOrId.startsWith('http')) {
-      channelUrl = `https://www.youtube.com/${channelUrlOrId}`;
+    if (!YOUTUBE_API_KEY) {
+      throw new Error('YOUTUBE_API_KEY not configured');
     }
 
-    // Check cache
-    const cacheKey = `youtube_${channelUrl}`;
+    const cacheKey = `youtube_${channelUrlOrId}`;
     const cached = cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
       return cached.data;
     }
 
-    const headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      'Accept': 'text/html,application/xhtml+xml',
-      'Accept-Language': 'en-US,en;q=0.9'
-    };
-
-    const response = await axios.get(channelUrl, {
-      headers,
-      timeout: 10000
-    });
-
-    const html = response.data;
-
-    // Extract subscriber count
-    const subMatch = html.match(/"subscriberCountText":\{"simpleText":"([\d.KMB]+)/);
-    const viewMatch = html.match(/"viewCountText":\{"simpleText":"([\d.KMB]+)/);
-    const videoMatch = html.match(/"videoCountText":\{"simpleText":"([\d.KMB]+)/);
-
-    if (!subMatch) {
-      throw new Error('Could not parse YouTube channel');
+    let channelId = channelUrlOrId;
+    if (channelUrlOrId.includes('youtube.com') || channelUrlOrId.includes('youtu.be')) {
+      channelId = await getChannelIdFromUrl(channelUrlOrId);
     }
+
+    const stats = await getChannelStats(channelId);
 
     const data = {
       platform: 'youtube',
-      url: channelUrl,
-      subscribers: parseYouTubeCount(subMatch[1]) || 0,
-      total_views: parseYouTubeCount(viewMatch?.[1]) || 0,
-      video_count: parseYouTubeCount(videoMatch?.[1]) || 0,
-      // Estimate engagement (YouTube doesn't show exact per-channel numbers)
-      estimated_avg_likes: Math.round(parseYouTubeCount(viewMatch?.[1]) * 0.02 / Math.max(parseYouTubeCount(videoMatch?.[1]), 1)),
-      estimated_avg_comments: Math.round(parseYouTubeCount(viewMatch?.[1]) * 0.005 / Math.max(parseYouTubeCount(videoMatch?.[1]), 1))
+      url: `https://www.youtube.com/channel/${channelId}`,
+      subscribers: stats.subscriberCount || 0,
+      total_views: stats.viewCount || 0,
+      video_count: stats.videoCount || 0,
+      estimated_avg_likes: Math.round((stats.viewCount || 0) * 0.02 / Math.max(stats.videoCount, 1)),
+      estimated_avg_comments: Math.round((stats.viewCount || 0) * 0.005 / Math.max(stats.videoCount, 1))
     };
 
     cache.set(cacheKey, { data, timestamp: Date.now() });
     return data;
   } catch (error) {
-    throw new Error(`YouTube scraping failed: ${error.message}`);
+    throw new Error(`YouTube API failed: ${error.message}`);
+  }
+}
+
+async function getChannelIdFromUrl(url) {
+  try {
+    const response = await axios.get(YOUTUBE_API_BASE + '/search', {
+      params: {
+        part: 'snippet',
+        type: 'channel',
+        q: url.split('/').pop(),
+        key: YOUTUBE_API_KEY,
+        maxResults: 1
+      }
+    });
+
+    if (response.data.items?.length) {
+      return response.data.items[0].snippet.channelId;
+    }
+    throw new Error('Channel not found');
+  } catch (error) {
+    throw new Error(`Failed to resolve channel: ${error.message}`);
+  }
+}
+
+async function getChannelStats(channelId) {
+  try {
+    const response = await axios.get(YOUTUBE_API_BASE + '/channels', {
+      params: {
+        part: 'statistics,snippet',
+        id: channelId,
+        key: YOUTUBE_API_KEY
+      }
+    });
+
+    if (!response.data.items?.length) {
+      throw new Error('Channel not found');
+    }
+
+    const channel = response.data.items[0];
+    return {
+      subscriberCount: parseInt(channel.statistics?.subscriberCount || 0),
+      viewCount: parseInt(channel.statistics?.viewCount || 0),
+      videoCount: parseInt(channel.statistics?.videoCount || 0)
+    };
+  } catch (error) {
+    throw new Error(`Failed to fetch channel stats: ${error.message}`);
   }
 }
 

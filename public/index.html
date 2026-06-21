@@ -5,14 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StatsFlow</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
   <style>
+    @font-face {
+      font-family: 'Cakra';
+      src: url('/fonts/Cakra-Normal.otf') format('opentype');
+      font-weight: 700;
+    }
+    @font-face {
+      font-family: 'AR_ZOZH';
+      src: url('/fonts/AR_ZOZH.ttf') format('truetype');
+      font-weight: 400;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { height: 100%; width: 100%; }
     body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #faf6f0 0%, #fff5e6 100%);
-      color: #3a3a3a;
+      font-family: 'AR_ZOZH', sans-serif;
+      background: #FFEDACA;
+      color: #3E2723;
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -20,51 +29,51 @@
     }
 
     .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
+    .content { flex: 1; overflow-y: auto; padding: 24px 20px; padding-bottom: 100px; }
 
-    .tabs { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #f0e5d8; display: flex; z-index: 100; height: 70px; }
-    .tab-btn { flex: 1; border: none; background: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #b0b0b0; font-size: 11px; transition: color 0.3s; font-weight: 600; position: relative; }
-    .tab-btn.active { color: #ed7c30; }
-    .tab-btn.active::after { content: ''; position: absolute; bottom: 0; width: 24px; height: 3px; background: #ed7c30; border-radius: 2px; }
+    .tabs { position: fixed; bottom: 0; left: 0; right: 0; background: #FFEDACA; border-top: 1px solid #F5DEB3; display: flex; z-index: 100; height: 70px; }
+    .tab-btn { flex: 1; border: none; background: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; color: #9B8B7E; font-size: 11px; transition: color 0.3s; font-weight: 600; position: relative; }
+    .tab-btn.active { color: #212842; }
+    .tab-btn.active::after { content: ''; position: absolute; bottom: 0; width: 20px; height: 2px; background: #212842; border-radius: 1px; }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; border: 1px solid #f0e5d8; }
-    .title { font-family: 'Playfair Display'; font-size: 28px; font-weight: 900; background: linear-gradient(135deg, #ed7c30, #f8edad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
-    .subtitle { font-size: 14px; color: #7a7a7a; margin-bottom: 20px; }
+    .card { background: #FBF8F4; border-radius: 8px; padding: 24px; margin-bottom: 20px; border: 1px solid #E8D4C0; }
+    .title { font-family: 'Cakra', sans-serif; font-size: 32px; font-weight: 800; color: #212842; margin-bottom: 8px; letter-spacing: -0.5px; }
+    .subtitle { font-size: 14px; color: #5A4F47; margin-bottom: 20px; font-weight: 400; }
 
-    textarea { width: 100%; padding: 12px; border: 1px solid #e8dcc8; border-radius: 8px; font-size: 14px; font-family: inherit; resize: vertical; min-height: 100px; }
-    .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 12px; transition: all 0.3s; }
-    .btn-primary { background: linear-gradient(135deg, #ed7c30, #f8edad); color: white; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(237,124,48,0.3); }
+    textarea { width: 100%; padding: 12px 14px; border: 1px solid #E8D4C0; border-radius: 6px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 100px; color: #212842; background: #FBF8F4; }
+    .btn { width: 100%; padding: 13px 16px; border: 1px solid #212842; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 14px; transition: all 0.2s; background: #212842; color: #F0E7D5; font-size: 13px; }
+    .btn-primary { background: #212842; color: #F0E7D5; border: 1px solid #212842; }
+    .btn-primary:hover { background: #F0E7D5; color: #212842; }
 
-    .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
-    .service-card { background: linear-gradient(135deg, rgba(237,124,48,0.05), rgba(248,238,173,0.1)); border: 2px solid rgba(237,124,48,0.1); border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.3s; }
-    .service-card:hover { border-color: #ed7c30; transform: translateY(-4px); box-shadow: 0 8px 20px rgba(237,124,48,0.15); }
-    .service-icon { font-size: 32px; margin-bottom: 8px; }
-    .service-name { font-weight: 600; color: #3a3a3a; font-size: 13px; margin-bottom: 4px; }
-    .service-time { font-size: 11px; color: #ed7c30; font-weight: 600; }
-    .service-desc { font-size: 12px; color: #7a7a7a; margin-top: 8px; line-height: 1.4; }
+    .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+    .service-card { background: #FBF8F4; border: 1px solid #E8D4C0; border-radius: 8px; padding: 18px; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .service-card:hover { border-color: #212842; background: #F5F0E8; }
+    .service-icon { font-size: 32px; margin-bottom: 10px; }
+    .service-name { font-weight: 600; color: #212842; font-size: 13px; margin-bottom: 4px; }
+    .service-time { font-size: 11px; color: #5A4F47; font-weight: 500; }
+    .service-desc { font-size: 12px; color: #6B5F54; margin-top: 8px; line-height: 1.4; }
 
     .results { display: none; margin-top: 20px; }
     .results.show { display: block; }
 
-    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
-    .metric { background: #faf6f0; padding: 12px; border-radius: 8px; text-align: center; }
-    .metric-val { font-size: 18px; font-weight: 700; color: #ed7c30; }
-    .metric-label { font-size: 11px; color: #8a8a8a; margin-top: 4px; }
+    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+    .metric { background: #FBF8F4; padding: 16px; border-radius: 8px; text-align: center; border: 1px solid #E8D4C0; }
+    .metric-val { font-size: 20px; font-weight: 700; color: #212842; }
+    .metric-label { font-size: 11px; color: #5A4F47; margin-top: 5px; font-weight: 400; }
 
-    .section-title { font-family: 'Playfair Display'; font-size: 18px; font-weight: 700; color: #3a3a3a; margin: 20px 0 12px 0; }
+    .section-title { font-family: 'Cakra', sans-serif; font-size: 18px; font-weight: 700; color: #212842; margin: 22px 0 14px 0; letter-spacing: -0.3px; }
 
-    .feature { display: flex; gap: 10px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+    .feature { display: flex; gap: 12px; align-items: flex-start; padding: 13px 0; border-bottom: 1px solid #EDE5DB; font-size: 13px; }
     .feature:last-child { border-bottom: none; }
-    .feature-icon { font-size: 16px; }
-    .feature-text { color: #5a5a5a; line-height: 1.5; }
+    .feature-icon { font-size: 16px; min-width: 20px; }
+    .feature-text { color: #3F3A35; line-height: 1.5; font-weight: 400; }
 
-    .profile-section { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid #f0e5d8; }
-    .profile-title { font-weight: 700; color: #3a3a3a; margin-bottom: 8px; }
-    .profile-text { font-size: 13px; color: #5a5a5a; line-height: 1.6; }
+    .profile-section { background: #FBF8F4; border-radius: 8px; padding: 20px; margin-bottom: 14px; border: 1px solid #E8D4C0; }
+    .profile-title { font-weight: 700; color: #212842; margin-bottom: 10px; font-size: 14px; }
+    .profile-text { font-size: 13px; color: #3F3A35; line-height: 1.6; font-weight: 400; }
   </style>
 </head>
 <body>
@@ -310,27 +319,47 @@
       if (!url) return alert('Вставь ссылку');
 
       try {
-        const res = await fetch('/api/scrape', {
+        const scrapeRes = await fetch('/api/scrape', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ profile_url: url })
         });
 
-        const data = await res.json();
-        const stats = data.data;
+        if (!scrapeRes.ok) {
+          const err = await scrapeRes.json();
+          throw new Error(err.error || 'Ошибка скрейпинга');
+        }
 
-        const analysis = await fetch('/api/analyze', {
+        const scrapeData = await scrapeRes.json();
+        if (!scrapeData.success || !scrapeData.data) {
+          throw new Error('Некорректный ответ от скрейпера');
+        }
+
+        const stats = scrapeData.data;
+        const followers = stats.followers || stats.subscribers || 0;
+
+        const analysisRes = await fetch('/api/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            followers: stats.followers || stats.subscribers || 0,
+            followers: followers,
             likes: stats.estimated_likes || stats.likes || 0,
-            views: stats.total_views || 0,
-            comments: stats.estimated_comments || 0,
+            views: stats.total_views || stats.views || 0,
+            comments: stats.estimated_comments || stats.comments || 0,
             reposts: 0,
             platform: stats.platform
           })
-        }).then(r => r.json());
+        });
+
+        if (!analysisRes.ok) {
+          const err = await analysisRes.json();
+          throw new Error(err.error || 'Ошибка анализа');
+        }
+
+        const analysis = await analysisRes.json();
+        if (!analysis.success || !analysis.analysis) {
+          throw new Error('Некорректный ответ анализа');
+        }
 
         document.getElementById('res-followers').textContent = analysis.analysis.followers.toLocaleString();
         document.getElementById('res-engagement').textContent = Math.round(analysis.analysis.engagement_rate) + '%';
