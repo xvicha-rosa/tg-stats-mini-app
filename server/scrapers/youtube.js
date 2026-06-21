@@ -43,11 +43,28 @@ export async function scrapeYouTubeChannel(channelUrlOrId) {
 
 async function getChannelIdFromUrl(url) {
   try {
-    const response = await axios.get(YOUTUBE_API_BASE + '/search', {
+    // Extract username/handle from URL
+    let query = url.split('/').pop().replace('@', '');
+
+    // First try to get channel by forUsername (for @handles)
+    let response = await axios.get(YOUTUBE_API_BASE + '/channels', {
+      params: {
+        part: 'statistics,snippet',
+        forUsername: query,
+        key: YOUTUBE_API_KEY
+      }
+    });
+
+    if (response.data.items?.length) {
+      return response.data.items[0].id;
+    }
+
+    // Fallback: search for channel by name
+    response = await axios.get(YOUTUBE_API_BASE + '/search', {
       params: {
         part: 'snippet',
         type: 'channel',
-        q: url.split('/').pop(),
+        q: query,
         key: YOUTUBE_API_KEY,
         maxResults: 1
       }
