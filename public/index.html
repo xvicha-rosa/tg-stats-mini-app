@@ -337,15 +337,22 @@
 
         const stats = scrapeData.data;
         const followers = stats.followers || stats.subscribers || 0;
+        const likes = stats.estimated_likes || stats.likes || 0;
+        const views = stats.total_views || stats.views || 0;
+        const comments = stats.estimated_comments || stats.comments || 0;
+
+        if (!followers || !likes || !stats.platform) {
+          throw new Error(`Missing stats: followers=${followers}, likes=${likes}, platform=${stats.platform}`);
+        }
 
         const analysisRes = await fetch('/api/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            followers: followers,
-            likes: stats.estimated_likes || stats.likes || 0,
-            views: stats.total_views || stats.views || 0,
-            comments: stats.estimated_comments || stats.comments || 0,
+            followers,
+            likes,
+            views,
+            comments,
             reposts: 0,
             platform: stats.platform
           })
