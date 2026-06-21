@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { analyzeStats, calculateGrowth } from './utils/analytics.js';
+import { analyzeStats, getFreeAnalysis, getPremiumAnalysis } from './utils/analytics.js';
 import { verifyTelegramData } from './utils/telegram.js';
 import { scrapeTikTokProfile, extractTikTokUsername, validateTikTokUrl } from './scrapers/tiktok.js';
 import { scrapeInstagramProfile, extractInstagramUsername, validateInstagramUrl } from './scrapers/instagram.js';
@@ -64,29 +64,26 @@ app.post('/api/analyze', (req, res) => {
   try {
     const { followers, likes, views, comments, reposts, platform } = req.body;
 
-    if (!followers || !likes || !platform) {
+    if (!followers || followers === undefined || !platform) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const analysis = analyzeStats({
+    const data = {
       followers,
-      likes,
+      likes: likes || 0,
       views: views || 0,
       comments: comments || 0,
       reposts: reposts || 0,
       platform
-    });
+    };
 
-    const growth = calculateGrowth(followers, likes, views);
+    const analysis = analyzeStats(data);
+    const freeAnalysis = getFreeAnalysis(data);
 
     res.json({
       success: true,
       analysis,
-      preview: {
-        engagement_rate: analysis.engagement_rate,
-        potential_growth: growth.next_week_followers,
-        recommendation: growth.recommendation
-      }
+      free: freeAnalysis
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
