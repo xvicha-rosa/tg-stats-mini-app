@@ -115,6 +115,21 @@
     .info-icon:hover::after {
       opacity: 1;
     }
+
+    .promo-input { display: flex; gap: 8px; }
+    .promo-input input { flex: 1; padding: 12px 14px; border: 1px solid #E8D4C0; border-radius: 6px; font-size: 13px; font-family: inherit; color: #212842; background: #FBF8F4; }
+    .promo-input button { padding: 12px 18px; background: #212842; color: #F0E7D5; border: 1px solid #212842; border-radius: 6px; font-weight: 600; cursor: pointer; white-space: nowrap; font-size: 13px; transition: all 0.2s; }
+    .promo-input button:hover { background: #F0E7D5; color: #212842; }
+
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(62,39,35,0.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    .modal.show { display: flex; }
+    .modal-content { background: #FBF8F4; border-radius: 10px; padding: 24px; max-width: 400px; width: 100%; border: 1px solid #E8D4C0; }
+    .modal-title { font-family: 'Cakra', sans-serif; font-size: 22px; font-weight: 700; color: #212842; margin-bottom: 14px; letter-spacing: -0.3px; }
+
+    .discount-result { display: none; margin-top: 12px; padding: 12px; background: #EEF5EC; border-left: 3px solid #4C8C4A; border-radius: 6px; font-size: 13px; color: #2E5C2C; line-height: 1.6; }
+    .discount-result.show { display: block; }
+    .discount-error { display: none; margin-top: 12px; padding: 12px; background: #FBECEC; border-left: 3px solid #C0392B; border-radius: 6px; font-size: 13px; color: #C0392B; }
+    .discount-error.show { display: block; }
   </style>
 </head>
 <body>
@@ -330,6 +345,12 @@
       <!-- 4. PROFILE -->
       <div id="profile" class="tab-content">
         <div class="profile-section">
+          <div class="profile-title">💰 Промокод</div>
+          <div class="profile-text" style="margin-bottom: 12px;">Есть промокод? Примени его для скидки на Premium!</div>
+          <button class="btn btn-primary" onclick="openPromoModal()" style="margin-top: 0;">Применить промокод →</button>
+        </div>
+
+        <div class="profile-section">
           <div class="profile-title">Мой профиль</div>
           <div class="profile-text">Информация появится после первого анализа</div>
         </div>
@@ -353,12 +374,28 @@
         </div>
       </div>
     </div>
-
     <div class="tabs">
       <button class="tab-btn active" onclick="tab('home')"><div>🏠</div><div>Home</div></button>
       <button class="tab-btn" onclick="tab('analysis')"><div>📊</div><div>Анализ</div></button>
       <button class="tab-btn" onclick="tab('services')"><div>✨</div><div>Услуги</div></button>
       <button class="tab-btn" onclick="tab('profile')"><div>👤</div><div>Профиль</div></button>
+    </div>
+  </div>
+
+  <div id="promoModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-title">💰 Промокод</div>
+      <div class="profile-text">Вводи промокод и получай скидку на Premium анализ</div>
+
+      <div class="promo-input">
+        <input type="text" id="promoCode" placeholder="Введи код..." style="text-transform: uppercase;">
+        <button onclick="applyPromo()">Применить</button>
+      </div>
+
+      <div id="promoError" class="discount-error"></div>
+      <div id="promoResult" class="discount-result"></div>
+
+      <button class="btn" onclick="closePromoModal()" style="margin-top: 16px; background: #FBF8F4; color: #212842;">Закрыть</button>
     </div>
   </div>
 
@@ -463,6 +500,69 @@
       tg.sendData(JSON.stringify({ action: 'request_service', service }));
       alert('✓ Запрос отправлен в чат');
     }
+
+    function openPromoModal() {
+      document.getElementById('promoModal').classList.add('show');
+      document.getElementById('promoCode').value = '';
+      document.getElementById('promoError').classList.remove('show');
+      document.getElementById('promoResult').classList.remove('show');
+    }
+
+    function closePromoModal() {
+      document.getElementById('promoModal').classList.remove('show');
+    }
+
+    async function applyPromo() {
+      const code = document.getElementById('promoCode').value.trim().toUpperCase();
+      const errorEl = document.getElementById('promoError');
+      const resultEl = document.getElementById('promoResult');
+
+      if (!code) {
+        errorEl.textContent = '❌ Введи промокод';
+        errorEl.classList.add('show');
+        resultEl.classList.remove('show');
+        return;
+      }
+
+      try {
+        const validateRes = await fetch('/api/promo/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code })
+        }).then(r => r.json());
+
+        if (!validateRes.valid) {
+          errorEl.textContent = `❌ ${validateRes.error}`;
+          errorEl.classList.add('show');
+          resultEl.classList.remove('show');
+          return;
+        }
+
+        resultEl.innerHTML = `
+          ✅ Промокод активирован!<br>
+          <strong>${validateRes.description}</strong><br>
+          Скидка: <strong>${validateRes.discount}${validateRes.discountType === 'percent' ? '%' : '₽'}</strong>
+        `;
+        resultEl.classList.add('show');
+        errorEl.classList.remove('show');
+
+        setTimeout(() => closePromoModal(), 2500);
+      } catch (e) {
+        errorEl.textContent = '❌ Ошибка: ' + e.message;
+        errorEl.classList.add('show');
+        resultEl.classList.remove('show');
+      }
+    }
+
+    // Enter key support for promo input
+    document.addEventListener('DOMContentLoaded', () => {
+      const promoInput = document.getElementById('promoCode');
+      if (promoInput) {
+        promoInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') applyPromo();
+        });
+      }
+    });
   </script>
 </body>
 </html>

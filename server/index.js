@@ -3,16 +3,23 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import mongoose from 'mongoose';
 import { analyzeStats, getFreeAnalysis, getPremiumAnalysis } from './utils/analytics.js';
 import { verifyTelegramData } from './utils/telegram.js';
 import { scrapeTikTokProfile, extractTikTokUsername, validateTikTokUrl } from './scrapers/tiktok.js';
 import { scrapeInstagramProfile, extractInstagramUsername, validateInstagramUrl } from './scrapers/instagram.js';
 import { scrapeYouTubeChannel, extractYouTubeChannelId, validateYouTubeUrl } from './scrapers/youtube.js';
+import { validatePromoCode, applyPromoCode, createPromoCode, getPromoStats } from './utils/promo.js';
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// MongoDB connection (нужен только для промокодов; анализ работает без БД)
+mongoose.set('bufferCommands', false);
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/statsflow';
+mongoose.connect(MONGODB_URI).catch(err => console.error('MongoDB connection error:', err.message));
 
 const app = express();
 app.use(cors());
@@ -101,25 +108,21 @@ app.post('/api/premium-analyze', (req, res) => {
       return res.status(401).json({ error: 'Invalid Telegram data' });
     }
 
-    const analysis = analyzeStats({
+    const data = {
       followers,
-      likes,
+      likes: likes || 0,
       views: views || 0,
       comments: comments || 0,
       reposts: reposts || 0,
       platform
-    });
-
-    const detailed = {
-      ...analysis,
-      detailed_recommendations: getDetailedRecommendations(analysis, platform),
-      competitor_analysis: getCompetitorAnalysis(followers, likes, views),
-      content_strategy: getContentStrategy(platform, analysis)
     };
+
+    const analysis = analyzeStats(data);
+    const premium = getPremiumAnalysis(data);
 
     res.json({
       success: true,
-      data: detailed,
+      data: { ...analysis, ...premium },
       user_id: user.id,
       username: user.username
     });
@@ -142,39 +145,83 @@ app.post('/api/payment-webhook', (req, res) => {
   }
 });
 
-function getDetailedRecommendations(analysis, platform) {
-  const recs = [];
 
-  if (analysis.engagement_rate < 3) {
-    recs.push('Увеличь частоту постов или улучши качество контента');
+// Promo code endpoints
+app.post('/api/promo/validate', async (req, res) => {
+  try {
+    const { code } = req.body;
+
+    if (!code) {
+      return res.status(400).json({ error: 'Промокод не указан' });
+    }
+
+    const result = await validatePromoCode(code);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-  if (analysis.like_to_view_ratio < 0.02) {
-    recs.push('Лайки низкие относительно просмотров. Делай более интересный контент в начале');
+});
+
+app.post('/api/promo/apply', async (req, res) => {
+  try {
+    const { initData, code, basePrice } = req.body;
+
+    if (!code || basePrice === undefined) {
+      return res.status(400).json({ error: 'Промокод и сумма обязательны' });
+    }
+
+    const user = verifyTelegramData(initData);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid Telegram data' });
+    }
+
+    const result = await applyPromoCode(code, user.id, basePrice);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-  if (analysis.comment_rate < 0.01) {
-    recs.push('Добавь вопросы в описание, вовлекай аудиторию в комментарии');
+});
+
+// Admin endpoint - create promo code
+app.post('/api/admin/promo/create', async (req, res) => {
+  try {
+    const { adminToken, code, discount, discountType, maxUses, expiresAt, description } = req.body;
+
+    // Simple admin token validation
+    if (adminToken !== process.env.ADMIN_TOKEN) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const result = await createPromoCode({
+      code,
+      discount,
+      discountType,
+      maxUses,
+      expiresAt,
+      description
+    });
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
+});
 
-  return recs;
-}
+// Admin endpoint - get promo stats
+app.get('/api/admin/promo/stats/:code', async (req, res) => {
+  try {
+    const { adminToken } = req.query;
 
-function getCompetitorAnalysis(followers, likes, views) {
-  return {
-    your_avg_engagement: Math.round((likes / followers) * 100 * 100) / 100,
-    market_avg_engagement: 2.5,
-    position: Math.round((likes / followers) * 100) > 2.5 ? 'выше среднего' : 'ниже среднего'
-  };
-}
+    if (adminToken !== process.env.ADMIN_TOKEN) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
 
-function getContentStrategy(platform, analysis) {
-  const strategies = {
-    tiktok: 'Фокусируйся на трендах, используй актуальную музыку, постай регулярно',
-    instagram: 'Баланс между Reels и Posts. Используй Hashtags стратегически',
-    youtube: 'Консистентность - ключ. 1-2 видео в неделю, 8+ минут для монетизации'
-  };
-
-  return strategies[platform] || 'Постай регулярно и взаимодействуй с аудиторией';
-}
+    const stats = await getPromoStats(req.params.code);
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
