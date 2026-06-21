@@ -48,10 +48,11 @@ export async function scrapeInstagramProfile(username) {
       url
     };
 
-    // For Instagram, we'll estimate engagement from profile
-    // This is approximate - real engagement needs per-post data
-    data.estimated_likes = Math.round(data.followers * 0.03); // ~3% likes per post
-    data.estimated_comments = Math.round(data.followers * 0.005); // ~0.5% comments
+    // Instagram не отдаёт просмотры в профиле — оцениваем средние на пост.
+    // Охват ~30% подписчиков, лайки ~3%, комментарии ~0.5%
+    data.estimated_likes = Math.round(data.followers * 0.03);
+    data.estimated_comments = Math.round(data.followers * 0.005);
+    data.total_views = Math.round(data.followers * 0.30); // оценка охвата как "просмотры"
 
     cache.set(`instagram_${username}`, { data, timestamp: Date.now() });
     return data;

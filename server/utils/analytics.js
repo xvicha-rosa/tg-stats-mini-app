@@ -12,7 +12,7 @@ export function analyzeStats(data) {
     views,
     comments,
     reposts,
-    engagement_rate: Math.round(metrics.engagement_rate * 100) / 100,
+    engagement_rate: Math.round(metrics.engagement_rate * 10000) / 100,
     like_to_view_ratio: Math.round(metrics.like_to_view_ratio * 10000) / 10000,
     comment_rate: Math.round(metrics.comment_rate * 100) / 100,
     repost_rate: Math.round(metrics.repost_rate * 100) / 100,
@@ -70,8 +70,8 @@ function calculateMetrics(followers, likes, views, comments, reposts) {
     comments: comments || 0,
     reposts: reposts || 0,
     engagement_rate: followers > 0 ? ((likes + comments + reposts) / followers) : 0,
-    like_to_view_ratio: views > 0 ? likes / views : 0,
-    comment_rate: likes > 0 ? comments / likes : 0,
+    like_to_view_ratio: views > 0 ? Math.min(likes / views, 1) : 0,
+    comment_rate: likes > 0 ? Math.min(comments / likes, 1) : 0,
     repost_rate: likes > 0 ? reposts / likes : 0,
     videoCount: 1
   };

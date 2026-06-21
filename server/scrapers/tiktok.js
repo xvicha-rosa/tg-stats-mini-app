@@ -48,23 +48,30 @@ export async function scrapeTikTokProfile(username) {
       throw new Error('Could not parse TikTok profile');
     }
 
-    const views = parseInt(viewMatch?.[1]) || parseInt(totalViewMatch?.[1]) || 0;
-    const comments = parseInt(commentMatch?.[1]) || parseInt(totalCommentMatch?.[1]) || 0;
+    const videoCount = Math.max(parseInt(videoMatch?.[1]) || 1, 1);
+    const totalHearts = parseInt(heartMatch?.[1]) || 0; // лайки за всё время аккаунта
 
-    // Estimate if not found: average ~10% views per video, ~2% comments per video
-    const videoCount = parseInt(videoMatch?.[1]) || 1;
-    const estimatedViews = views || (parseInt(heartMatch?.[1]) || 0) / 0.02 / videoCount;
-    const estimatedComments = comments || (parseInt(heartMatch?.[1]) || 0) * 0.02 / videoCount;
+    // Приводим всё к СРЕДНЕМУ НА ОДИН РОЛИК (иначе lifetime-лайки ломают метрики)
+    const avgLikes = Math.round(totalHearts / videoCount);
+
+    // viewCount в профиле часто относится к одному ролику. Если он меньше средних
+    // лайков — это мусор, оцениваем просмотры из лайков (типичный like-rate ~6%)
+    const parsedViews = parseInt(viewMatch?.[1]) || parseInt(totalViewMatch?.[1]) || 0;
+    const avgViews = parsedViews > avgLikes ? parsedViews : Math.round(avgLikes / 0.06);
+
+    const parsedComments = parseInt(commentMatch?.[1]) || parseInt(totalCommentMatch?.[1]) || 0;
+    const avgComments = parsedComments > 0 ? parsedComments : Math.round(avgLikes * 0.02);
 
     const data = {
       platform: 'tiktok',
       username,
       followers: parseInt(dataMatch[1]) || 0,
       following: parseInt(followingMatch?.[1]) || 0,
-      likes: parseInt(heartMatch?.[1]) || 0,
       videos: videoCount,
-      total_views: Math.round(views) || Math.round(estimatedViews),
-      estimated_comments: Math.round(comments) || Math.round(estimatedComments),
+      total_hearts: totalHearts,
+      estimated_likes: avgLikes,
+      total_views: avgViews,
+      estimated_comments: avgComments,
       url
     };
 

@@ -25,19 +25,20 @@ export async function scrapeYouTubeChannel(channelUrlOrId) {
     const stats = await getChannelStats(channelId);
 
     const videoCount = Math.max(stats.videoCount || 1, 1);
-    const estimatedLikesPerVideo = Math.round((stats.viewCount || 0) * 0.02 / videoCount);
-    const estimatedCommentsPerVideo = Math.round((stats.viewCount || 0) * 0.005 / videoCount);
+    // Приводим к СРЕДНЕМУ НА ОДНО ВИДЕО (viewCount у API — суммарно за всё время)
+    const avgViews = Math.round((stats.viewCount || 0) / videoCount);
+    const avgLikes = Math.round(avgViews * 0.02);   // ~2% лайков от просмотров
+    const avgComments = Math.round(avgViews * 0.005); // ~0.5% комментариев
 
     const data = {
       platform: 'youtube',
       url: `https://www.youtube.com/channel/${channelId}`,
       subscribers: stats.subscriberCount || 0,
-      total_views: stats.viewCount || 0,
+      lifetime_views: stats.viewCount || 0,
       video_count: videoCount,
-      estimated_likes: estimatedLikesPerVideo * videoCount,
-      estimated_comments: estimatedCommentsPerVideo * videoCount,
-      estimated_avg_likes: estimatedLikesPerVideo,
-      estimated_avg_comments: estimatedCommentsPerVideo
+      total_views: avgViews,
+      estimated_likes: avgLikes,
+      estimated_comments: avgComments
     };
 
     cache.set(cacheKey, { data, timestamp: Date.now() });
