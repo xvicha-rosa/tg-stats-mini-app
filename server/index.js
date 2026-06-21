@@ -9,7 +9,7 @@ import { verifyTelegramData } from './utils/telegram.js';
 import { scrapeTikTokProfile, extractTikTokUsername, validateTikTokUrl } from './scrapers/tiktok.js';
 import { scrapeInstagramProfile, extractInstagramUsername, validateInstagramUrl } from './scrapers/instagram.js';
 import { scrapeYouTubeChannel, extractYouTubeChannelId, validateYouTubeUrl } from './scrapers/youtube.js';
-import { validatePromoCode, applyPromoCode, createPromoCode, getPromoStats } from './utils/promo.js';
+import { validatePromoCode, redeemPromoCode, getUserCredits, spendCredit, createPromoCode, getPromoStats } from './utils/promo.js';
 
 dotenv.config();
 
@@ -131,6 +131,57 @@ app.post('/api/premium-analyze', (req, res) => {
   }
 });
 
+// Баланс кредитов (бесплатных анализов) пользователя
+app.post('/api/credits', async (req, res) => {
+  try {
+    const user = verifyTelegramData(req.body.initData);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid Telegram data' });
+    }
+    const credits = await getUserCredits(String(user.id));
+    res.json({ success: true, credits });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Премиум-анализ за 1 кредит (списывает кредит, затем отдаёт анализ)
+app.post('/api/premium/use-credit', async (req, res) => {
+  try {
+    const { initData, followers, likes, views, comments, reposts, platform } = req.body;
+
+    const user = verifyTelegramData(initData);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid Telegram data' });
+    }
+
+    const spent = await spendCredit(String(user.id));
+    if (!spent.success) {
+      return res.status(402).json({ error: spent.error });
+    }
+
+    const data = {
+      followers,
+      likes: likes || 0,
+      views: views || 0,
+      comments: comments || 0,
+      reposts: reposts || 0,
+      platform
+    };
+
+    const analysis = analyzeStats(data);
+    const premium = getPremiumAnalysis(data);
+
+    res.json({
+      success: true,
+      data: { ...analysis, ...premium },
+      credits_remaining: spent.remaining
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Payment webhook for Telegram Stars
 app.post('/api/payment-webhook', (req, res) => {
   try {
@@ -162,12 +213,13 @@ app.post('/api/promo/validate', async (req, res) => {
   }
 });
 
-app.post('/api/promo/apply', async (req, res) => {
+// Активация промокода → начисляет бесплатные анализы (кредиты)
+app.post('/api/promo/redeem', async (req, res) => {
   try {
-    const { initData, code, basePrice } = req.body;
+    const { initData, code } = req.body;
 
-    if (!code || basePrice === undefined) {
-      return res.status(400).json({ error: 'Промокод и сумма обязательны' });
+    if (!code) {
+      return res.status(400).json({ error: 'Промокод не указан' });
     }
 
     const user = verifyTelegramData(initData);
@@ -175,7 +227,7 @@ app.post('/api/promo/apply', async (req, res) => {
       return res.status(401).json({ error: 'Invalid Telegram data' });
     }
 
-    const result = await applyPromoCode(code, user.id, basePrice);
+    const result = await redeemPromoCode(code, String(user.id));
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });

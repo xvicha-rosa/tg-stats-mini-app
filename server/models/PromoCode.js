@@ -20,6 +20,10 @@ const promoCodeSchema = new mongoose.Schema(
       enum: ['percent', 'fixed'],
       default: 'percent'
     },
+    credits: {
+      type: Number,
+      default: 1
+    },
     maxUses: {
       type: Number,
       default: null

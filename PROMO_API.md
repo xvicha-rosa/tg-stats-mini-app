@@ -23,15 +23,14 @@ Content-Type: application/json
 }
 ```
 
-### Применение промокода
+### Активация промокода (начисляет кредиты = бесплатные анализы)
 ```bash
-POST /api/promo/apply
+POST /api/promo/redeem
 Content-Type: application/json
 
 {
   "initData": "query_id=...",
-  "code": "PROMO50",
-  "basePrice": 100
+  "code": "PROMO50"
 }
 ```
 
@@ -39,12 +38,25 @@ Content-Type: application/json
 ```json
 {
   "success": true,
-  "originalPrice": 100,
-  "discount": "50%",
-  "finalPrice": 50,
-  "saved": 50
+  "code": "PROMO50",
+  "credits_granted": 1,
+  "total_credits": 1
 }
 ```
+
+### Баланс кредитов
+```bash
+POST /api/credits
+{ "initData": "query_id=..." }
+```
+Ответ: `{ "success": true, "credits": 1 }`
+
+### Премиум-анализ за 1 кредит
+```bash
+POST /api/premium/use-credit
+{ "initData": "...", "followers": 1000, "likes": 50, "views": 800, "comments": 5, "platform": "tiktok" }
+```
+Списывает 1 кредит, возвращает полный премиум-анализ. Если кредитов нет → HTTP 402.
 
 ### Создать промокод (Admin)
 ```bash

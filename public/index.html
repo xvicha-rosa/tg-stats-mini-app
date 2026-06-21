@@ -127,6 +127,13 @@
     .pf-stat-val { font-size: 20px; font-weight: 700; color: #212842; }
     .pf-stat-label { font-size: 11px; color: #5A4F47; margin-top: 5px; }
 
+    .pay-option { display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid #E8D4C0; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; background: #FFF; }
+    .pay-option:hover:not(.pay-option-disabled) { border-color: #212842; background: #F5F0E8; }
+    .pay-option-disabled { opacity: 0.5; cursor: not-allowed; }
+    .pay-option-title { font-weight: 600; color: #212842; font-size: 14px; }
+    .pay-option-sub { font-size: 12px; color: #5A4F47; margin-top: 3px; }
+    .pay-option-arrow { font-size: 18px; color: #212842; }
+
     .promo-input { display: flex; gap: 8px; }
     .promo-input input { flex: 1; padding: 12px 14px; border: 1px solid #E8D4C0; border-radius: 6px; font-size: 13px; font-family: inherit; color: #212842; background: #FBF8F4; }
     .promo-input button { padding: 12px 18px; background: #212842; color: #F0E7D5; border: 1px solid #212842; border-radius: 6px; font-weight: 600; cursor: pointer; white-space: nowrap; font-size: 13px; transition: all 0.2s; }
@@ -278,7 +285,14 @@
             <div class="feature-icon">✓</div>
             <div class="feature-text">Топ-5 рекомендаций</div>
           </div>
-          <button class="btn btn-primary" style="margin-top: 16px;">Купить Premium →</button>
+          <button class="btn btn-primary" style="margin-top: 16px;" onclick="openPaymentModal()">Получить Premium →</button>
+        </div>
+
+        <div id="premium-result" class="card" style="display: none;">
+          <h3 class="section-title">⭐ Premium анализ</h3>
+          <div id="premium-rootcause" style="font-size: 13px; color: #212842; font-weight: 600; background: #FFF6E0; border-left: 3px solid #212842; padding: 12px; border-radius: 6px; margin-bottom: 14px; line-height: 1.6;"></div>
+          <div id="premium-insights" style="display: flex; flex-direction: column; gap: 10px;"></div>
+          <div id="premium-conclusion" style="font-size: 13px; color: #3F3A35; line-height: 1.7; margin-top: 16px; white-space: pre-line;"></div>
         </div>
       </div>
 
@@ -368,8 +382,8 @@
             <div class="pf-stat-label">Анализов</div>
           </div>
           <div class="pf-stat">
-            <div class="pf-stat-val" id="pf-promo">—</div>
-            <div class="pf-stat-label">Промокод</div>
+            <div class="pf-stat-val" id="pf-promo">0</div>
+            <div class="pf-stat-label">Доступно анализов</div>
           </div>
         </div>
 
@@ -403,10 +417,38 @@
     </div>
   </div>
 
+  <div id="paymentModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-title">⭐ Получить Premium</div>
+      <div class="profile-text" style="margin-bottom: 16px;">Выбери способ оплаты для полного анализа</div>
+
+      <div class="pay-option" onclick="usePremiumCredit()">
+        <div class="pay-option-main">
+          <div class="pay-option-title">🎟 Списать 1 анализ</div>
+          <div class="pay-option-sub" id="pay-credits">Доступно: 0</div>
+        </div>
+        <div class="pay-option-arrow">→</div>
+      </div>
+
+      <div class="pay-option pay-option-disabled">
+        <div class="pay-option-main">
+          <div class="pay-option-title">⭐ 50 Telegram Stars</div>
+          <div class="pay-option-sub">Скоро</div>
+        </div>
+      </div>
+
+      <div id="payError" class="discount-error"></div>
+
+      <div class="profile-text" style="margin-top: 14px; font-size: 12px;">Нет анализов? Активируй промокод во вкладке Профиль</div>
+
+      <button class="btn" onclick="closePaymentModal()" style="margin-top: 16px; background: #FBF8F4; color: #212842;">Закрыть</button>
+    </div>
+  </div>
+
   <div id="promoModal" class="modal">
     <div class="modal-content">
       <div class="modal-title">💰 Промокод</div>
-      <div class="profile-text">Вводи промокод и получай скидку на Premium анализ</div>
+      <div class="profile-text">Активируй промокод и получи бесплатный Premium-анализ</div>
 
       <div class="promo-input">
         <input type="text" id="promoCode" placeholder="Введи код..." style="text-transform: uppercase;">
@@ -443,14 +485,30 @@
         }
       }
 
-      // Кол-во анализов и применённый промокод (локально)
+      // Кол-во анализов (локально)
       const count = parseInt(localStorage.getItem('sf_analyses') || '0');
       document.getElementById('pf-analyses').textContent = count;
 
-      const promo = localStorage.getItem('sf_promo');
-      if (promo) {
-        document.getElementById('pf-promo').textContent = promo;
-        document.getElementById('pf-status').textContent = '⭐ Промокод активен';
+      // Баланс кредитов (с сервера)
+      refreshCredits();
+    }
+
+    async function refreshCredits() {
+      try {
+        const res = await fetch('/api/credits', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initData: tg.initData })
+        }).then(r => r.json());
+
+        const credits = res.credits || 0;
+        document.getElementById('pf-promo').textContent = credits;
+        const payEl = document.getElementById('pay-credits');
+        if (payEl) payEl.textContent = 'Доступно: ' + credits;
+        document.getElementById('pf-status').textContent = credits > 0 ? '⭐ ' + credits + ' Premium-анализ(ов)' : '🆓 Бесплатный план';
+        return credits;
+      } catch (e) {
+        return 0;
       }
     }
     initProfile();
@@ -496,6 +554,9 @@
         if (!followers || !likes || !stats.platform) {
           throw new Error(`Missing stats: followers=${followers}, likes=${likes}, platform=${stats.platform}`);
         }
+
+        // Запоминаем для премиум-анализа
+        window.lastAnalysis = { followers, likes, views, comments, reposts: 0, platform: stats.platform };
 
         const analysisRes = await fetch('/api/analyze', {
           method: 'POST',
@@ -586,14 +647,14 @@
       }
 
       try {
-        const validateRes = await fetch('/api/promo/validate', {
+        const res = await fetch('/api/promo/redeem', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code })
+          body: JSON.stringify({ code, initData: tg.initData })
         }).then(r => r.json());
 
-        if (!validateRes.valid) {
-          errorEl.textContent = `❌ ${validateRes.error}`;
+        if (!res.success) {
+          errorEl.textContent = `❌ ${res.error}`;
           errorEl.classList.add('show');
           resultEl.classList.remove('show');
           return;
@@ -601,23 +662,92 @@
 
         resultEl.innerHTML = `
           ✅ Промокод активирован!<br>
-          <strong>${validateRes.description}</strong><br>
-          Скидка: <strong>${validateRes.discount}${validateRes.discountType === 'percent' ? '%' : '₽'}</strong>
+          Начислено: <strong>${res.credits_granted} бесплатный анализ</strong><br>
+          Всего доступно: <strong>${res.total_credits}</strong>
         `;
         resultEl.classList.add('show');
         errorEl.classList.remove('show');
 
-        // Сохраняем промокод в профиль
-        localStorage.setItem('sf_promo', validateRes.code);
-        document.getElementById('pf-promo').textContent = validateRes.code;
-        document.getElementById('pf-status').textContent = '⭐ Промокод активен';
-
+        refreshCredits();
         setTimeout(() => closePromoModal(), 2500);
       } catch (e) {
         errorEl.textContent = '❌ Ошибка: ' + e.message;
         errorEl.classList.add('show');
         resultEl.classList.remove('show');
       }
+    }
+
+    // --- Premium оплата ---
+    function openPaymentModal() {
+      if (!window.lastAnalysis) {
+        alert('Сначала сделай обычный анализ профиля');
+        return;
+      }
+      document.getElementById('payError').classList.remove('show');
+      document.getElementById('paymentModal').classList.add('show');
+      refreshCredits();
+    }
+
+    function closePaymentModal() {
+      document.getElementById('paymentModal').classList.remove('show');
+    }
+
+    async function usePremiumCredit() {
+      const errorEl = document.getElementById('payError');
+      errorEl.classList.remove('show');
+
+      if (!window.lastAnalysis) {
+        alert('Сначала сделай обычный анализ');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/premium/use-credit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initData: tg.initData, ...window.lastAnalysis })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          errorEl.textContent = '❌ ' + (data.error || 'Не удалось');
+          errorEl.classList.add('show');
+          return;
+        }
+
+        renderPremium(data.data);
+        refreshCredits();
+        closePaymentModal();
+      } catch (e) {
+        errorEl.textContent = '❌ Ошибка: ' + e.message;
+        errorEl.classList.add('show');
+      }
+    }
+
+    function renderPremium(d) {
+      document.getElementById('premium-rootcause').textContent = d.root_cause || '';
+
+      const cats = {
+        retention: 'Удержание', algorithmicSignals: 'Алгоритм',
+        positioning: 'Позиционирование', content: 'Контент',
+        audience: 'Аудитория', scaling: 'Масштабирование',
+        seriality: 'Серийность', distribution: 'Распространение'
+      };
+      const box = document.getElementById('premium-insights');
+      box.innerHTML = '';
+      const insights = d.premium_insights || {};
+      for (const key in insights) {
+        const row = document.createElement('div');
+        row.className = 'feature';
+        row.innerHTML = `<div class="feature-icon">▸</div><div class="feature-text"><strong>${cats[key] || key}:</strong> ${insights[key]}</div>`;
+        box.appendChild(row);
+      }
+
+      document.getElementById('premium-conclusion').textContent = d.conclusion || '';
+      const el = document.getElementById('premium-result');
+      el.style.display = 'block';
+      el.scrollIntoView({ behavior: 'smooth' });
     }
 
     // Enter key support for promo input

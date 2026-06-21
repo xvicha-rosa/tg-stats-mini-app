@@ -1,5 +1,6 @@
 import PromoCode from '../models/PromoCode.js';
 import UserPromo from '../models/UserPromo.js';
+import UserCredits from '../models/UserCredits.js';
 
 export async function validatePromoCode(code, userId = null) {
   if (!code || typeof code !== 'string') {
@@ -45,7 +46,8 @@ export async function validatePromoCode(code, userId = null) {
   }
 }
 
-export async function applyPromoCode(code, userId, basePrice) {
+// Активация промокода → начисляет кредиты (бесплатные анализы) пользователю
+export async function redeemPromoCode(code, userId) {
   try {
     const validation = await validatePromoCode(code, userId);
 
@@ -53,39 +55,64 @@ export async function applyPromoCode(code, userId, basePrice) {
       return { success: false, error: validation.error };
     }
 
-    const { discount, discountType } = validation;
-    let finalPrice = basePrice;
+    const promo = await PromoCode.findOne({ code: code.toUpperCase() });
+    const grant = promo.credits != null ? promo.credits : 1;
 
-    if (discountType === 'percent') {
-      finalPrice = basePrice * (1 - discount / 100);
-    } else if (discountType === 'fixed') {
-      finalPrice = Math.max(0, basePrice - discount);
-    }
-
-    // Логирование использования
-    const userPromo = new UserPromo({
+    // Лог использования (защита от повторной активации тем же юзером)
+    await new UserPromo({
       userId,
       promoCode: code.toUpperCase(),
-      discount,
-      discountType
-    });
-    await userPromo.save();
+      discount: promo.discount,
+      discountType: promo.discountType
+    }).save();
 
-    // Увеличение счётчика использований
-    await PromoCode.updateOne(
-      { code: code.toUpperCase() },
-      { $inc: { currentUses: 1 } }
+    await PromoCode.updateOne({ code: code.toUpperCase() }, { $inc: { currentUses: 1 } });
+
+    // Начисление кредитов
+    const updated = await UserCredits.findOneAndUpdate(
+      { userId },
+      { $inc: { credits: grant } },
+      { upsert: true, new: true }
     );
 
     return {
       success: true,
-      originalPrice: basePrice,
-      discount: discountType === 'percent' ? `${discount}%` : `${discount}₽`,
-      finalPrice: Math.round(finalPrice * 100) / 100,
-      saved: Math.round((basePrice - finalPrice) * 100) / 100
+      code: promo.code,
+      credits_granted: grant,
+      total_credits: updated.credits
     };
   } catch (error) {
-    console.error('Ошибка применения промокода:', error);
+    console.error('Ошибка активации промокода:', error);
+    return { success: false, error: 'Ошибка сервера' };
+  }
+}
+
+export async function getUserCredits(userId) {
+  try {
+    const rec = await UserCredits.findOne({ userId });
+    return rec ? rec.credits : 0;
+  } catch (error) {
+    console.error('Ошибка получения кредитов:', error);
+    return 0;
+  }
+}
+
+// Списание 1 кредита (атомарно — только если баланс > 0)
+export async function spendCredit(userId) {
+  try {
+    const updated = await UserCredits.findOneAndUpdate(
+      { userId, credits: { $gt: 0 } },
+      { $inc: { credits: -1 } },
+      { new: true }
+    );
+
+    if (!updated) {
+      return { success: false, error: 'Нет доступных анализов' };
+    }
+
+    return { success: true, remaining: updated.credits };
+  } catch (error) {
+    console.error('Ошибка списания кредита:', error);
     return { success: false, error: 'Ошибка сервера' };
   }
 }
