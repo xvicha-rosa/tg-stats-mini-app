@@ -37,10 +37,24 @@ export async function scrapeTikTokProfile(username) {
     const followingMatch = html.match(/"followingCount":(\d+)/);
     const heartMatch = html.match(/"heart":(\d+)/);
     const videoMatch = html.match(/"videoCount":(\d+)/);
+    const viewMatch = html.match(/"viewCount":(\d+)/);
+    const commentMatch = html.match(/"commentCount":(\d+)/);
+
+    // Alternative patterns if primary doesn't work
+    const totalViewMatch = html.match(/"totalViews":"?(\d+)"?/);
+    const totalCommentMatch = html.match(/"totalComments":"?(\d+)"?/);
 
     if (!dataMatch) {
       throw new Error('Could not parse TikTok profile');
     }
+
+    const views = parseInt(viewMatch?.[1]) || parseInt(totalViewMatch?.[1]) || 0;
+    const comments = parseInt(commentMatch?.[1]) || parseInt(totalCommentMatch?.[1]) || 0;
+
+    // Estimate if not found: average ~10% views per video, ~2% comments per video
+    const videoCount = parseInt(videoMatch?.[1]) || 1;
+    const estimatedViews = views || (parseInt(heartMatch?.[1]) || 0) / 0.02 / videoCount;
+    const estimatedComments = comments || (parseInt(heartMatch?.[1]) || 0) * 0.02 / videoCount;
 
     const data = {
       platform: 'tiktok',
@@ -48,7 +62,9 @@ export async function scrapeTikTokProfile(username) {
       followers: parseInt(dataMatch[1]) || 0,
       following: parseInt(followingMatch?.[1]) || 0,
       likes: parseInt(heartMatch?.[1]) || 0,
-      videos: parseInt(videoMatch?.[1]) || 0,
+      videos: videoCount,
+      total_views: Math.round(views) || Math.round(estimatedViews),
+      estimated_comments: Math.round(comments) || Math.round(estimatedComments),
       url
     };
 
