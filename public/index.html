@@ -116,6 +116,17 @@
       opacity: 1;
     }
 
+    .profile-card { background: #212842; border-radius: 10px; padding: 28px 20px; margin-bottom: 14px; text-align: center; }
+    .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: #FFEDACA; color: #212842; font-size: 38px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; overflow: hidden; background-size: cover; background-position: center; }
+    .profile-name { font-family: 'Cakra', sans-serif; font-size: 22px; font-weight: 700; color: #F0E7D5; letter-spacing: -0.3px; }
+    .profile-username { font-size: 13px; color: #B9A88F; margin-top: 4px; }
+    .profile-badge { display: inline-block; margin-top: 14px; padding: 6px 14px; border-radius: 20px; background: rgba(255,237,202,0.12); color: #F8EDAD; font-size: 12px; font-weight: 600; }
+
+    .profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .pf-stat { background: #FBF8F4; border: 1px solid #E8D4C0; border-radius: 8px; padding: 16px; text-align: center; }
+    .pf-stat-val { font-size: 20px; font-weight: 700; color: #212842; }
+    .pf-stat-label { font-size: 11px; color: #5A4F47; margin-top: 5px; }
+
     .promo-input { display: flex; gap: 8px; }
     .promo-input input { flex: 1; padding: 12px 14px; border: 1px solid #E8D4C0; border-radius: 6px; font-size: 13px; font-family: inherit; color: #212842; background: #FBF8F4; }
     .promo-input button { padding: 12px 18px; background: #212842; color: #F0E7D5; border: 1px solid #212842; border-radius: 6px; font-weight: 600; cursor: pointer; white-space: nowrap; font-size: 13px; transition: all 0.2s; }
@@ -344,15 +355,28 @@
 
       <!-- 4. PROFILE -->
       <div id="profile" class="tab-content">
+        <div class="profile-card">
+          <div class="profile-avatar" id="pf-avatar">👤</div>
+          <div class="profile-name" id="pf-name">Гость</div>
+          <div class="profile-username" id="pf-username"></div>
+          <div class="profile-badge" id="pf-status">🆓 Бесплатный план</div>
+        </div>
+
+        <div class="profile-stats">
+          <div class="pf-stat">
+            <div class="pf-stat-val" id="pf-analyses">0</div>
+            <div class="pf-stat-label">Анализов</div>
+          </div>
+          <div class="pf-stat">
+            <div class="pf-stat-val" id="pf-promo">—</div>
+            <div class="pf-stat-label">Промокод</div>
+          </div>
+        </div>
+
         <div class="profile-section">
           <div class="profile-title">💰 Промокод</div>
           <div class="profile-text" style="margin-bottom: 12px;">Есть промокод? Примени его для скидки на Premium!</div>
           <button class="btn btn-primary" onclick="openPromoModal()" style="margin-top: 0;">Применить промокод →</button>
-        </div>
-
-        <div class="profile-section">
-          <div class="profile-title">Мой профиль</div>
-          <div class="profile-text">Информация появится после первого анализа</div>
         </div>
 
         <div class="profile-section">
@@ -402,6 +426,37 @@
   <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
+    tg.expand();
+
+    // --- Профиль ---
+    function initProfile() {
+      const user = tg.initDataUnsafe?.user;
+
+      if (user) {
+        const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Пользователь';
+        document.getElementById('pf-name').textContent = fullName;
+        document.getElementById('pf-username').textContent = user.username ? '@' + user.username : 'ID: ' + user.id;
+
+        const avatar = document.getElementById('pf-avatar');
+        if (user.photo_url) {
+          avatar.style.backgroundImage = `url('${user.photo_url}')`;
+          avatar.textContent = '';
+        } else {
+          avatar.textContent = (user.first_name || '?').charAt(0).toUpperCase();
+        }
+      }
+
+      // Кол-во анализов и применённый промокод (локально)
+      const count = parseInt(localStorage.getItem('sf_analyses') || '0');
+      document.getElementById('pf-analyses').textContent = count;
+
+      const promo = localStorage.getItem('sf_promo');
+      if (promo) {
+        document.getElementById('pf-promo').textContent = promo;
+        document.getElementById('pf-status').textContent = '⭐ Промокод активен';
+      }
+    }
+    initProfile();
 
     function tab(name) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -486,6 +541,11 @@
         }
 
         document.getElementById('results').classList.add('show');
+
+        // Счётчик анализов в профиле
+        const count = parseInt(localStorage.getItem('sf_analyses') || '0') + 1;
+        localStorage.setItem('sf_analyses', count);
+        document.getElementById('pf-analyses').textContent = count;
       } catch (e) {
         alert('Ошибка: ' + e.message);
       }
@@ -545,6 +605,11 @@
         `;
         resultEl.classList.add('show');
         errorEl.classList.remove('show');
+
+        // Сохраняем промокод в профиль
+        localStorage.setItem('sf_promo', validateRes.code);
+        document.getElementById('pf-promo').textContent = validateRes.code;
+        document.getElementById('pf-status').textContent = '⭐ Промокод активен';
 
         setTimeout(() => closePromoModal(), 2500);
       } catch (e) {
