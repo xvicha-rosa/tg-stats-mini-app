@@ -759,6 +759,47 @@
         });
       }
     });
+
+    // Preview-режим для дизайна (?screen=...). В обычной работе не активен.
+    (function previewMode() {
+      const screen = new URLSearchParams(location.search).get('screen');
+      if (!screen) return;
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      const showTab = (n) => {
+        document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
+        document.getElementById(n).classList.add('active');
+      };
+      const fillResults = () => {
+        set('res-metric1-val', '21 000 000'); set('res-metric2-val', '5%');
+        set('res-metric3-val', '6.2%'); set('res-metric4-val', '4.0%');
+        set('advice-1', 'Низкий процент досмотров до конца');
+        set('advice-2', 'Недостаточный уровень репостов для масштабирования ролика');
+        set('advice-3', 'Контент получает просмотры, но не получает сигналов для масштабирования');
+        document.getElementById('results').classList.add('show');
+      };
+      const fillPremium = () => {
+        set('premium-rootcause', 'Видео проходят первый этап распределения, но не получают сигналов для масштабирования на втором.');
+        const items = [['Удержание','Резкий провал удержания на конкретном моменте'],['Алгоритм','Низкая конверсия просмотра в подписку'],['Контент','Слабый первый кадр'],['Масштабирование','Видео теряют импульс после первых показов']];
+        document.getElementById('premium-insights').innerHTML = items.map(([c,t]) => `<div class="feature"><div class="feature-icon">▸</div><div class="feature-text"><strong>${c}:</strong> ${t}</div></div>`).join('');
+        set('premium-conclusion', 'Основная проблема — слабый хук в первые секунды. Переделай первый кадр на 3-5 роликах, добавь открытую петлю. Повтори анализ через неделю.');
+        document.getElementById('premium-result').style.display = 'block';
+      };
+      const fillProfile = () => {
+        set('pf-name', 'Максим'); set('pf-username', '@xvichals'); set('pf-avatar', 'М');
+        set('pf-analyses', '3'); set('pf-promo', '1'); set('pf-status', '⭐ 1 Premium-анализ');
+      };
+      switch (screen) {
+        case 'home': showTab('home'); break;
+        case 'analysis-empty': showTab('analysis'); break;
+        case 'results': showTab('analysis'); fillResults(); break;
+        case 'premium': showTab('analysis'); fillResults(); fillPremium(); break;
+        case 'services': showTab('services'); break;
+        case 'profile': showTab('profile'); fillProfile(); break;
+        case 'pay': showTab('analysis'); fillProfile(); set('pay-credits','Доступно: 1'); document.getElementById('paymentModal').classList.add('show'); break;
+        case 'promo': showTab('profile'); fillProfile(); { const r=document.getElementById('promoResult'); r.innerHTML='✅ Промокод активирован!<br>Начислено: <strong>1 бесплатный анализ</strong><br>Всего доступно: <strong>1</strong>'; r.classList.add('show'); document.getElementById('promoModal').classList.add('show'); } break;
+      }
+    })();
   </script>
 </body>
 </html>

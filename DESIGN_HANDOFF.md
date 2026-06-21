@@ -41,6 +41,23 @@ Telegram Mini App для анализа соцсетей (TikTok / Instagram / Y
 
 ---
 
+# Скриншоты текущего состояния (стартовая точка)
+
+Все экраны на 375px (мобила), в `public/design-screens/`:
+
+| Экран | Файл |
+|---|---|
+| Home | ![](public/design-screens/1-home.png) |
+| Анализ — пустой | ![](public/design-screens/2-analysis-empty.png) |
+| Анализ — результаты | ![](public/design-screens/3-analysis-results.png) |
+| Premium-результат | ![](public/design-screens/4-premium-result.png) |
+| Услуги | ![](public/design-screens/5-services.png) |
+| Профиль | ![](public/design-screens/6-profile.png) |
+| Модалка оплаты | ![](public/design-screens/7-modal-payment.png) |
+| Модалка промокода | ![](public/design-screens/8-modal-promo.png) |
+
+---
+
 # Экраны и состояния
 
 Приложение = 4 вкладки (таб-бар снизу) + 2 модалки.
