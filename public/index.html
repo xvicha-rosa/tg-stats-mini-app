@@ -172,6 +172,24 @@
             </div>
             <button class="btn btn-primary" onclick="resetAnalysis()" style="margin-top: 16px;">← Новый анализ</button>
           </div>
+
+          <div class="card">
+            <h3 class="section-title">Что улучшить</h3>
+            <div id="advice-container" style="display: flex; flex-direction: column; gap: 12px;">
+              <div class="feature">
+                <div class="feature-icon">1</div>
+                <div class="feature-text" id="advice-1"></div>
+              </div>
+              <div class="feature">
+                <div class="feature-icon">2</div>
+                <div class="feature-text" id="advice-2"></div>
+              </div>
+              <div class="feature">
+                <div class="feature-icon">✨</div>
+                <div class="feature-text" id="advice-3" style="font-weight: 500; color: #3E2723;"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="card">
@@ -371,7 +389,14 @@
         document.getElementById('res-followers').textContent = analysis.analysis.followers.toLocaleString();
         document.getElementById('res-engagement').textContent = Math.round(analysis.analysis.engagement_rate) + '%';
         document.getElementById('res-score').textContent = analysis.analysis.quality_score;
-        document.getElementById('res-growth').textContent = '+' + (analysis.preview.potential_growth - analysis.analysis.followers).toLocaleString();
+        document.getElementById('res-growth').textContent = Math.round(analysis.analysis.engagement_rate * 15) + '%';
+
+        if (analysis.free && analysis.free.advice) {
+          document.getElementById('advice-1').textContent = analysis.free.advice[0] || 'Совет не доступен';
+          document.getElementById('advice-2').textContent = analysis.free.advice[1] || 'Совет не доступен';
+          document.getElementById('advice-3').textContent = analysis.free.advice[2] || 'Инсайт не доступен';
+        }
+
         document.getElementById('results').classList.add('show');
       } catch (e) {
         alert('Ошибка: ' + e.message);
