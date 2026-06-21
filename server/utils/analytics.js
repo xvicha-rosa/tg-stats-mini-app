@@ -40,6 +40,8 @@ export function getPremiumAnalysis(data) {
   const { followers, likes, views, comments, reposts, platform } = data;
   const metrics = calculateMetrics(followers, likes, views, comments, reposts);
 
+  const conclusion = generateConclusion(metrics, platform);
+
   return {
     root_cause: identifyRootCause(metrics),
     insights: {
@@ -48,7 +50,8 @@ export function getPremiumAnalysis(data) {
       positioning: analyzePositioning(metrics),
       scaling: analyzeScaling(metrics)
     },
-    recommendations: generateRecommendations(metrics, platform)
+    recommendations: generateRecommendations(metrics, platform),
+    conclusion: conclusion
   };
 }
 
@@ -164,6 +167,34 @@ function analyzeScaling(metrics) {
     return { stage: 'На хорошем уровне просмотров', issue: 'Алгоритм перестает раздавать дальше на миллионы' };
   }
   return { stage: 'Низкий уровень просмотров', issue: 'Контент не проходит фильтр алгоритма на начальных стадиях' };
+}
+
+function generateConclusion(metrics, platform) {
+  let text = [];
+
+  if (metrics.followers < 100) {
+    text.push('Новый аккаунт. Приоритет: алгоритм должен распознать тематику и начать расширять охват.');
+    text.push('Шаг 1: Убедись, что хук работает (первые 0.5с удерживают 80%+ аудитории).');
+    text.push('Шаг 2: Выбери 1 нишу и придерживайся её (алгоритму нужна консистентность).');
+    text.push('Шаг 3: Постой каждый день или через день 7-10 дней и смотри метрики.');
+  } else if (metrics.like_to_view_ratio < 0.01) {
+    text.push('Основная проблема: контент не цепляет на начальном этапе (люди свайпают в первые секунды).');
+    text.push('Немедленно переделай первый кадр и крючок — это критично.');
+    text.push('Тестируй разные варианты крючков на 3-5 видео и смотри, какой работает.');
+    text.push('После улучшения крючка повтори анализ через неделю.');
+  } else if (metrics.engagement_rate > 0.05 && metrics.followers < 1000) {
+    text.push('Хорошие метрики, но аккаунт маленький. Алгоритм готов расширять.');
+    text.push('Увеличь частоту постов (минимум 1 в день) чтобы алгоритм видел активность.');
+    text.push('Добавь CTA в конце каждого видео: "Подпишись", "Коммент", "Сохрани".');
+    text.push('Повтори анализ через 2 недели — должен быть заметный рост.');
+  } else {
+    text.push('Аккаунт на плато. Алгоритм показывает видео, но не расширяет охват.');
+    text.push('Возможные причины: смешение тематик, ошибка в позиционировании или слабая аудитория.');
+    text.push('Пересмотри последние 5 видео с лучшей вовлеченностью — найди общий паттерн.');
+    text.push('Сделай серию из 5-7 видео только по паттерну лучших роликов.');
+  }
+
+  return text.join('\n');
 }
 
 function generateRecommendations(metrics, platform) {
