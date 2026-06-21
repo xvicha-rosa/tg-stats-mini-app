@@ -89,10 +89,31 @@
       cursor: help;
       margin-left: 4px;
       vertical-align: middle;
+      position: relative;
     }
     .info-icon:hover {
       background: #212842;
-      opacity: 0.8;
+    }
+    .info-icon::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #3E2723;
+      color: #FFEDACA;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      white-space: nowrap;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      font-weight: normal;
+    }
+    .info-icon:hover::after {
+      opacity: 1;
     }
   </style>
 </head>
@@ -179,11 +200,15 @@
               </div>
               <div class="metric">
                 <div class="metric-val" id="res-engagement">0</div>
-                <div class="metric-label">Энгейджмент <span class="info-icon" title="% зрителей которые лайкнут, прокомментируют или репостят видео">ⓘ</span></div>
+                <div class="metric-label">Энгейджмент <span class="info-icon" data-tooltip="% лайков, комментариев, репостов">ⓘ</span></div>
               </div>
               <div class="metric">
                 <div class="metric-val" id="res-score">75</div>
                 <div class="metric-label">Качество</div>
+              </div>
+              <div class="metric">
+                <div class="metric-text" id="res-banal" style="font-size: 12px; line-height: 1.4; color: #3E2723; padding: 8px 0;"></div>
+                <div class="metric-label">Совет</div>
               </div>
             </div>
             <button class="btn btn-primary" onclick="resetAnalysis()" style="margin-top: 16px;">← Новый анализ</button>
@@ -407,6 +432,8 @@
         document.getElementById('res-score').textContent = analysis.analysis.quality_score;
 
         if (analysis.free && analysis.free.advice) {
+          const banal1 = analysis.free.advice[0] ? analysis.free.advice[0].substring(0, 50) + '...' : 'Совет';
+          document.getElementById('res-banal').textContent = banal1;
           document.getElementById('advice-1').textContent = analysis.free.advice[0] || 'Совет не доступен';
           document.getElementById('advice-2').textContent = analysis.free.advice[1] || 'Совет не доступен';
           document.getElementById('advice-3').textContent = analysis.free.advice[2] || 'Инсайт не доступен';
