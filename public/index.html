@@ -74,6 +74,26 @@
     .profile-section { background: #FBF8F4; border-radius: 8px; padding: 20px; margin-bottom: 14px; border: 1px solid #E8D4C0; }
     .profile-title { font-weight: 700; color: #212842; margin-bottom: 10px; font-size: 14px; }
     .profile-text { font-size: 13px; color: #3F3A35; line-height: 1.6; font-weight: 400; }
+
+    .info-icon {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      line-height: 16px;
+      text-align: center;
+      border-radius: 50%;
+      background: #3E2723;
+      color: #FFEDACA;
+      font-size: 10px;
+      font-weight: bold;
+      cursor: help;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+    .info-icon:hover {
+      background: #212842;
+      opacity: 0.8;
+    }
   </style>
 </head>
 <body>
@@ -159,15 +179,11 @@
               </div>
               <div class="metric">
                 <div class="metric-val" id="res-engagement">0</div>
-                <div class="metric-label">Энгейджмент</div>
+                <div class="metric-label">Энгейджмент <span class="info-icon" title="% зрителей которые лайкнут, прокомментируют или репостят видео">ⓘ</span></div>
               </div>
               <div class="metric">
                 <div class="metric-val" id="res-score">75</div>
                 <div class="metric-label">Качество</div>
-              </div>
-              <div class="metric">
-                <div class="metric-val" id="res-growth">+150</div>
-                <div class="metric-label">Прогноз</div>
               </div>
             </div>
             <button class="btn btn-primary" onclick="resetAnalysis()" style="margin-top: 16px;">← Новый анализ</button>
@@ -389,7 +405,6 @@
         document.getElementById('res-followers').textContent = analysis.analysis.followers.toLocaleString();
         document.getElementById('res-engagement').textContent = Math.round(analysis.analysis.engagement_rate) + '%';
         document.getElementById('res-score').textContent = analysis.analysis.quality_score;
-        document.getElementById('res-growth').textContent = Math.round(analysis.analysis.engagement_rate * 15) + '%';
 
         if (analysis.free && analysis.free.advice) {
           document.getElementById('advice-1').textContent = analysis.free.advice[0] || 'Совет не доступен';
