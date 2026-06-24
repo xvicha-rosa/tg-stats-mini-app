@@ -154,6 +154,30 @@
     .discount-result.show { display: block; }
     .discount-error { display: none; margin-top: 12px; padding: 12px; background: rgba(230,80,80,0.14); border-left: 3px solid #E65050; border-radius: 8px; font-size: 13px; color: #FF9B9B; }
     .discount-error.show { display: block; }
+
+    /* liquid glass тосты */
+    .toast-wrap { position: fixed; left: 0; right: 0; bottom: calc(90px + env(safe-area-inset-bottom, 0px)); z-index: 2000; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; padding: 0 20px; }
+    .toast {
+      pointer-events: auto; max-width: 360px; width: 100%; position: relative; overflow: hidden;
+      padding: 15px 18px; border-radius: 18px;
+      font-size: 14px; font-weight: 600; line-height: 1.45; color: #FFFFFF;
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(40,20,66,0.55);
+      backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.25);
+      transform: translateY(20px) scale(0.96); opacity: 0;
+      transition: transform 0.32s cubic-bezier(.2,.9,.3,1.2), opacity 0.32s ease;
+    }
+    .toast.show { transform: translateY(0) scale(1); opacity: 1; }
+    .toast::before {
+      content: ''; position: absolute; inset: 0; border-radius: 18px; pointer-events: none;
+      background: linear-gradient(140deg, rgba(255,255,255,0.18), rgba(255,255,255,0) 45%);
+    }
+    .toast-ico { font-size: 18px; flex-shrink: 0; position: relative; }
+    .toast-msg { position: relative; }
+    .toast.t-error { border-color: rgba(255,140,140,0.4); }
+    .toast.t-success { border-color: rgba(140,240,170,0.4); }
   </style>
 </head>
 <body>
@@ -468,10 +492,29 @@
     </div>
   </div>
 
+  <div class="toast-wrap" id="toastWrap"></div>
+
   <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
+
+    // liquid glass тост вместо alert
+    function toast(msg, type) {
+      const wrap = document.getElementById('toastWrap');
+      const el = document.createElement('div');
+      el.className = 'toast' + (type ? ' t-' + type : '');
+      const ico = type === 'error' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️';
+      el.innerHTML = `<span class="toast-ico">${ico}</span><span class="toast-msg"></span>`;
+      el.querySelector('.toast-msg').textContent = msg;
+      wrap.appendChild(el);
+      requestAnimationFrame(() => el.classList.add('show'));
+      try { tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(type === 'error' ? 'error' : 'success'); } catch (e) {}
+      setTimeout(() => {
+        el.classList.remove('show');
+        setTimeout(() => el.remove(), 350);
+      }, 3000);
+    }
 
     // --- Профиль ---
     function initProfile() {
@@ -532,7 +575,7 @@
 
     async function analyze() {
       const url = document.getElementById('profile-url').value.trim();
-      if (!url) return alert('Вставь ссылку');
+      if (!url) return toast('Вставь ссылку профиля', 'error');
 
       try {
         const scrapeRes = await fetch('/api/scrape', {
@@ -615,7 +658,7 @@
         localStorage.setItem('sf_analyses', count);
         document.getElementById('pf-analyses').textContent = count;
       } catch (e) {
-        alert('Ошибка: ' + e.message);
+        toast('Ошибка: ' + e.message, 'error');
       }
     }
 
@@ -626,7 +669,7 @@
 
     function request(service) {
       tg.sendData(JSON.stringify({ action: 'request_service', service }));
-      alert('✓ Запрос отправлен в чат');
+      toast('Запрос отправлен в чат', 'success');
     }
 
     function openPromoModal() {
@@ -686,7 +729,7 @@
     // --- Premium оплата ---
     function openPaymentModal() {
       if (!window.lastAnalysis) {
-        alert('Сначала сделай обычный анализ профиля');
+        toast('Сначала сделай обычный анализ профиля', 'error');
         return;
       }
       document.getElementById('payError').classList.remove('show');
@@ -703,7 +746,7 @@
       errorEl.classList.remove('show');
 
       if (!window.lastAnalysis) {
-        alert('Сначала сделай обычный анализ');
+        toast('Сначала сделай обычный анализ', 'error');
         return;
       }
 
